@@ -1,4 +1,4 @@
-package com.example.kapame
+package com.myapp.kapame
 
 import io.flutter.embedding.android.FlutterActivity
 

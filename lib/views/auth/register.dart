@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:kapame/models/app_user.dart';
-import 'package:kapame/models/auth_response.dart';
 import 'package:kapame/services/new_user.dart';
 import 'package:kapame/views/auth/register/bio.dart';
 import 'package:kapame/views/auth/register/contact_info.dart';
@@ -38,11 +36,10 @@ class _RegisterState extends State<Register> {
     final newUser = Provider.of<UserState>(context, listen: false);
     if (_currentStep == 0 && !validateBioStep(newUser)) return;
     if (_currentStep == 1 && !validateContactStep(newUser)) return;
-    if (_currentStep == 1 && !validateCredentialsStep(newUser)) return;
+    if (_currentStep == 2 && !validateCredentialsStep(newUser)) return;
     setState(() {
       if (_currentStep <= 2) {
         _currentStep += 1;
-        print(newUser.toString());
       }
     });
   }
@@ -72,7 +69,7 @@ class _RegisterState extends State<Register> {
           minimumSize: WidgetStatePropertyAll(
             Size(double.infinity, 60),
           ),
-          backgroundColor: const WidgetStatePropertyAll(
+          backgroundColor: WidgetStatePropertyAll(
             Color.fromARGB(255, 72, 72, 72),
           ),
         ),
@@ -81,10 +78,7 @@ class _RegisterState extends State<Register> {
     } else {
       return FilledButton(
         onPressed: () async {
-          AuthResponse? isAuth = await registerUser(context);
-          if (isAuth?.isSuccess == true) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
+          await registerUser(context);
         },
         style: const ButtonStyle(
           shape: WidgetStatePropertyAll(
@@ -112,9 +106,6 @@ class _RegisterState extends State<Register> {
   //Form Handling
   bool validateBioStep(UserState user) {
     List<String> errors = [];
-    if (user.dateOfBirth == null) {
-      errors.add("Date of Birth is required");
-    }
     if (user.gender.isEmpty || user.gender == 'Select gender') {
       errors.add("Gender is required");
     }
@@ -180,6 +171,10 @@ class _RegisterState extends State<Register> {
       errors.add("Passwords do not match");
     }
 
+    if (user.termsAccepted == false) {
+      errors.add("Terms and Conditions not accepted");
+    }
+
     if (errors.isNotEmpty) {
       Fluttertoast.showToast(
           msg: errors.join("\n"),
@@ -234,7 +229,7 @@ class _RegisterState extends State<Register> {
     return true;
   }
 
-  Future<AuthResponse?> registerUser(BuildContext context) async {
+  Future registerUser(BuildContext context) async {
     final newUser = Provider.of<UserState>(context, listen: false);
     try {
       if (validateUser(newUser)) {
@@ -264,23 +259,20 @@ class _RegisterState extends State<Register> {
               'referral': null
             });
 
-        print(res.data);
-        print(res.data['errors']);
-        print(res.data['user']);
-
         if (res.statusCode == 200) {
-          AuthResponse currentUser = AuthResponse(
-            res.data['message'],
-            res.data['isSuccess'],
-            res.data['token'],
-            res.data['errors'],
-            AppUser.fromMap(res.data['user']),
-            DateTime.parse(
-              res.data['expireDate'],
-            ),
-          );
+          // AuthResponse currentUser = AuthResponse(
+          //   res.data['message'],
+          //   res.data['isSuccess'],
+          //   res.data['token'],
+          //   res.data['errors'],
+          //   AppUser.fromMap(res.data['user']),
+          //   DateTime.parse(
+          //     res.data['expireDate'],
+          //   ),
+          // );
+          print(res.data);
 
-          return currentUser;
+          await Navigator.pushReplacementNamed(context, '/verifyemail');
         } else {
           setState(() {
             isLoading = false;
@@ -289,9 +281,12 @@ class _RegisterState extends State<Register> {
       }
     } catch (e) {
       if (e is DioException) {
-        print(newUser.toString());
         print(e.response?.data);
+        setState(() {
+          isLoading = false;
+        });
       }
+      print('e: $e');
     } finally {
       setState(() {
         isLoading = false;
@@ -319,7 +314,7 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
               child: Column(
                 children: [
-                  Image.asset('assets/images/kapamelogo.png'),
+                  Image.asset('assets/images/KapaMeLogo.png'),
                   Center(
                     child: stepList[_currentStep],
                   ),

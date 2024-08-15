@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kapame/services/new_user.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class Credentials extends StatefulWidget {
   const Credentials({super.key});
@@ -14,8 +15,7 @@ class _CredentialsState extends State<Credentials> {
   Widget build(BuildContext context) {
     TextEditingController passwordController = TextEditingController();
     TextEditingController confirmPasswordController = TextEditingController();
-
-    bool termsAccepted = false;
+    final newUser = Provider.of<UserState>(context, listen: false);
 
     void showTermsAndConditions() {
       showDialog(
@@ -23,32 +23,26 @@ class _CredentialsState extends State<Credentials> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Usage Policy'),
-            content: const SingleChildScrollView(
-              child: Text(''),
-            ),
+            content: SfPdfViewer.asset("assets/Usage_Policy.pdf"),
             actions: <Widget>[
               TextButton(
                 child: const Text('Decline'),
                 onPressed: () {
-                  setState(() {
-                    termsAccepted = false;
-                  });
                   Navigator.of(context).pop();
                   // Update user data in your state management solution
                   // For example, using Provider:
-                  // Provider.of<UserDataProvider>(context, listen: false).updateTermsStatus(false);
+                  Provider.of<UserState>(context, listen: false)
+                      .updateTermsAccepted(false);
                 },
               ),
               TextButton(
                 child: const Text('Accept'),
                 onPressed: () {
-                  setState(() {
-                    termsAccepted = true;
-                  });
                   Navigator.of(context).pop();
                   // Update user data in your state management solution
                   // For example, using Provider:
-                  // Provider.of<UserDataProvider>(context, listen: false).updateTermsStatus(true);
+                  Provider.of<UserState>(context, listen: false)
+                      .updateTermsAccepted(true);
                 },
               ),
             ],
@@ -124,7 +118,7 @@ class _CredentialsState extends State<Credentials> {
             minimumSize: WidgetStatePropertyAll(
               Size(60, 60),
             ),
-            backgroundColor: const WidgetStatePropertyAll(
+            backgroundColor: WidgetStatePropertyAll(
               Color.fromARGB(255, 19, 161, 232),
             ),
           ),
@@ -135,14 +129,10 @@ class _CredentialsState extends State<Credentials> {
         Row(
           children: [
             Checkbox(
-              value: termsAccepted,
+              value: newUser.termsAccepted,
               onChanged: (bool? value) {
-                setState(() {
-                  termsAccepted = value ?? false;
-                });
-                // Update user data in your state management solution
-                // For example, using Provider:
-                // Provider.of<UserDataProvider>(context, listen: false).updateTermsStatus(_termsAccepted);
+                Provider.of<UserState>(context, listen: false)
+                    .updateTermsAccepted(!newUser.termsAccepted);
               },
             ),
             const Text('I Accept the Terms and Conditions'),

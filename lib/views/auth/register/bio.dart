@@ -27,8 +27,6 @@ class _BioState extends State<Bio> {
       setState(() {
         selectedDate = picked;
       });
-
-      //print(userDateOfBirth);
     }
   }
 
@@ -74,8 +72,6 @@ class _BioState extends State<Bio> {
                   Provider.of<UserState>(context, listen: false).gender;
               Provider.of<UserState>(context, listen: false)
                   .updateGender(newValue ?? '');
-
-              print(gender);
             },
             icon: const Icon(Icons.arrow_drop_down),
             alignment: Alignment.center,

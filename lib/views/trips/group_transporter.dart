@@ -1,14 +1,10 @@
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/trip.dart';
-import 'package:kapame/services/current_user.dart';
 import 'package:location/location.dart';
-import 'package:provider/provider.dart';
 
 class GroupTransporter extends StatefulWidget {
   const GroupTransporter({super.key});
@@ -345,17 +341,17 @@ class _GroupTransporterState extends State<GroupTransporter> {
                           FilledButton(
                             onPressed: _applyFilters,
                             style: const ButtonStyle(
-                              shape: MaterialStatePropertyAll(
+                              shape: WidgetStatePropertyAll(
                                 RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(10),
                                   ),
                                 ),
                               ),
-                              minimumSize: MaterialStatePropertyAll(
+                              minimumSize: WidgetStatePropertyAll(
                                 Size(double.infinity, 60),
                               ),
-                              backgroundColor: MaterialStatePropertyAll(
+                              backgroundColor: WidgetStatePropertyAll(
                                 Color.fromARGB(255, 241, 144, 47),
                               ),
                             ),

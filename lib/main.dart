@@ -6,6 +6,7 @@ import 'package:kapame/services/new_user.dart';
 //routes
 import 'package:kapame/views/auth/login.dart';
 import 'package:kapame/views/auth/register.dart';
+import 'package:kapame/views/auth/verify_email.dart';
 import 'package:kapame/views/home/edit_profile.dart';
 import 'package:kapame/views/home/home.dart';
 import 'package:kapame/views/home/settings.dart';
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LandingPage(),
         '/register': (context) => const Register(),
+        '/verifyemail': (context) => const VerifyEmail(),
         '/login': (context) => const Login(),
         '/home': (context) => const Home(),
         '/editprofile': (context) => const EditProfile(),

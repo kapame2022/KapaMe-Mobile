@@ -8,14 +8,14 @@ class TripState extends ChangeNotifier {
   String _tripType = '';
   String _tripStatus = '';
   TripLocationInfo _tripLocationInfo = TripLocationInfo();
-  String _contactDetailsPhoneNumber = '';
-  String _contactDetailsEmail = '';
-  String _tripPriority = '';
-  String _tripScheduling = '';
-  DateTime _tripLastingTime = DateTime.now();
-  DateTime _tripDateTime = DateTime.now();
-  GroupTransportDetails _groupTransport = GroupTransportDetails();
-  ItemTransportDetails _itemTransport = ItemTransportDetails();
+  final String _contactDetailsPhoneNumber = '';
+  final String _contactDetailsEmail = '';
+  final String _tripPriority = '';
+  final String _tripScheduling = '';
+  final DateTime _tripLastingTime = DateTime.now();
+  final DateTime _tripDateTime = DateTime.now();
+  final GroupTransportDetails _groupTransport = GroupTransportDetails();
+  final ItemTransportDetails _itemTransport = ItemTransportDetails();
 
   String get requester => _requester;
   String get transporter => _transporter;

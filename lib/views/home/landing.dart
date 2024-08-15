@@ -14,7 +14,7 @@ class LandingPage extends StatelessWidget {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Image.asset('assets/images/kapamelogo.png'),
+                Image.asset('assets/images/KapaMeLogo.png'),
                 Container(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 0, vertical: 40),
@@ -26,14 +26,19 @@ class LandingPage extends StatelessWidget {
                             Navigator.pushNamed(context, '/login');
                           },
                           style: const ButtonStyle(
-                              shape: MaterialStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10)))),
-                              minimumSize: MaterialStatePropertyAll(
-                                  Size(double.infinity, 60)),
-                              backgroundColor:
-                                  MaterialStatePropertyAll(Colors.blue)),
+                            shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                            ),
+                            minimumSize: WidgetStatePropertyAll(
+                              Size(double.infinity, 60),
+                            ),
+                            backgroundColor:
+                                WidgetStatePropertyAll(Colors.blue),
+                          ),
                           child: const Text('Log in')),
                       const SizedBox(height: 10),
                       FilledButton(
@@ -41,14 +46,20 @@ class LandingPage extends StatelessWidget {
                             Navigator.pushNamed(context, '/register');
                           },
                           style: const ButtonStyle(
-                              shape: MaterialStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10)))),
-                              minimumSize: MaterialStatePropertyAll(
-                                  Size(double.infinity, 60)),
-                              backgroundColor: MaterialStatePropertyAll(
-                                  Color.fromARGB(255, 72, 72, 72))),
+                            shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(10),
+                                ),
+                              ),
+                            ),
+                            minimumSize: WidgetStatePropertyAll(
+                              Size(double.infinity, 60),
+                            ),
+                            backgroundColor: WidgetStatePropertyAll(
+                              Color.fromARGB(255, 72, 72, 72),
+                            ),
+                          ),
                           child: const Text('Register')),
                     ],
                   ),

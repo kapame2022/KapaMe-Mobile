@@ -264,18 +264,18 @@ class _EditProfileState extends State<EditProfile> {
                           }
                         },
                         style: const ButtonStyle(
-                          shape: MaterialStatePropertyAll(
+                          shape: WidgetStatePropertyAll(
                             RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(
                                 Radius.circular(10),
                               ),
                             ),
                           ),
-                          minimumSize: MaterialStatePropertyAll(
+                          minimumSize: WidgetStatePropertyAll(
                             Size(double.infinity, 60),
                           ),
                           backgroundColor:
-                              MaterialStatePropertyAll(Colors.orange),
+                              WidgetStatePropertyAll(Colors.orange),
                         ),
                         child: isLoading
                             ? const CircularProgressIndicator(

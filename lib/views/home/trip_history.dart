@@ -17,7 +17,6 @@ class _TripHistoryState extends State<TripHistory> {
     List<Trip> allTrips = [];
 
     for (Map<String, dynamic> trip in res.data) {
-      print(trip);
       Trip? deserializedTrip = Trip.fromMap(trip);
       // deserializedTrip.tripLocationInfo =
       //     TripLocationInfo.fromMap(trip['tripLocationInfo']);
@@ -63,9 +62,13 @@ class _TripHistoryState extends State<TripHistory> {
               future: getTrips(),
               builder: ((context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
                 } else {
                   return Expanded(
                     child: ListView.builder(

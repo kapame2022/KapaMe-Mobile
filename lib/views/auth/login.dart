@@ -52,10 +52,6 @@ class _LoginState extends State<Login> {
         "password": passwordController.text.trim()
       });
 
-      print(res.data);
-      print(res.data['message']);
-      print(res.data['user']);
-
       if (res.statusCode == 200) {
         AuthResponse currentUser = AuthResponse(
             res.data['message'],
@@ -66,20 +62,19 @@ class _LoginState extends State<Login> {
             DateTime.parse(res.data['expireDate']));
 
         return currentUser;
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-        throw Exception("Function cannot return null");
       }
     } catch (e) {
-      print("Login error: $e");
+      print("error: $e");
+      setState(() {
+        isLoading = false;
+      });
       return null;
     } finally {
       setState(() {
         isLoading = false;
       });
     }
+    return null;
   }
 
   @override
@@ -94,7 +89,7 @@ class _LoginState extends State<Login> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Image.asset('assets/images/kapamelogo.png'),
+                  Image.asset('assets/images/KapaMeLogo.png'),
                   Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 0, vertical: 50),

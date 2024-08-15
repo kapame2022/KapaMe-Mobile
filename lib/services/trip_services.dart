@@ -17,7 +17,6 @@ class TripServices {
     final Response response = await dio.get(requestUrl.toString());
 
     if (response.statusCode == 200) {
-      print(response.data['predictions']);
       //suggestions = response.data['predictions'];
       return Future.value(response.data['predictions']);
     } else {

@@ -308,17 +308,17 @@ class _ItemTransporterState extends State<ItemTransporter> {
                             FilledButton(
                               onPressed: _applyFilters,
                               style: const ButtonStyle(
-                                shape: MaterialStatePropertyAll(
+                                shape: WidgetStatePropertyAll(
                                   RoundedRectangleBorder(
                                     borderRadius: BorderRadius.all(
                                       Radius.circular(10),
                                     ),
                                   ),
                                 ),
-                                minimumSize: MaterialStatePropertyAll(
+                                minimumSize: WidgetStatePropertyAll(
                                   Size(double.infinity, 60),
                                 ),
-                                backgroundColor: MaterialStatePropertyAll(
+                                backgroundColor: WidgetStatePropertyAll(
                                   Color.fromARGB(255, 241, 144, 47),
                                 ),
                               ),

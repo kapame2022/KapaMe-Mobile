@@ -44,13 +44,13 @@ class Settings extends StatelessWidget {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            const MaterialStatePropertyAll<Color>(Colors.blue),
-                        shape: MaterialStateProperty.all(
+                            const WidgetStatePropertyAll<Color>(Colors.blue),
+                        shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        minimumSize: const MaterialStatePropertyAll(
+                        minimumSize: const WidgetStatePropertyAll(
                           Size.fromHeight(60),
                         ),
                       ),
@@ -66,13 +66,13 @@ class Settings extends StatelessWidget {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            const MaterialStatePropertyAll<Color>(Colors.blue),
-                        shape: MaterialStateProperty.all(
+                            const WidgetStatePropertyAll<Color>(Colors.blue),
+                        shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        minimumSize: const MaterialStatePropertyAll(
+                        minimumSize: const WidgetStatePropertyAll(
                           Size.fromHeight(60),
                         ),
                       ),
@@ -88,13 +88,13 @@ class Settings extends StatelessWidget {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            const MaterialStatePropertyAll<Color>(Colors.blue),
-                        shape: MaterialStateProperty.all(
+                            const WidgetStatePropertyAll<Color>(Colors.blue),
+                        shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        minimumSize: const MaterialStatePropertyAll(
+                        minimumSize: const WidgetStatePropertyAll(
                           Size.fromHeight(60),
                         ),
                       ),
@@ -110,13 +110,13 @@ class Settings extends StatelessWidget {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            const MaterialStatePropertyAll<Color>(Colors.blue),
-                        shape: MaterialStateProperty.all(
+                            const WidgetStatePropertyAll<Color>(Colors.blue),
+                        shape: WidgetStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        minimumSize: const MaterialStatePropertyAll(
+                        minimumSize: const WidgetStatePropertyAll(
                           Size.fromHeight(60),
                         ),
                       ),

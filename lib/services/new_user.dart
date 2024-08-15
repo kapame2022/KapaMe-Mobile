@@ -8,6 +8,7 @@ class UserState extends ChangeNotifier {
   String _phoneNumber = '';
   String _password = '';
   String _confirmPassword = '';
+  bool _termsAccepted = false;
 
   DateTime get dateOfBirth => _dateOfBirth;
   String get gender => _gender;
@@ -16,6 +17,7 @@ class UserState extends ChangeNotifier {
   String get phoneNumber => _phoneNumber;
   String get password => _password;
   String get confirmPassword => _confirmPassword;
+  bool get termsAccepted => _termsAccepted;
 
   void updateDateOfBirth(DateTime newDateOfBirth) {
     _dateOfBirth = newDateOfBirth;
@@ -52,8 +54,8 @@ class UserState extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  String toString() {
-    return 'Fullname: $fullName \nUsername: $fullName \nDate of Birth: $dateOfBirth \nEmail: $email \nGender: $gender \nPhone Number: $phoneNumber \nPassword: $password \nConfirm Password: $confirmPassword';
+  void updateTermsAccepted(bool newTermsAccepted) {
+    _termsAccepted = newTermsAccepted;
+    notifyListeners();
   }
 }

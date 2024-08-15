@@ -22,8 +22,9 @@ class _HomeState extends State<Home> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-              child: Expanded(
-                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
                   CircleAvatar(
                     backgroundColor: Colors.blue,
                     child: TextButton(
@@ -32,7 +33,7 @@ class _HomeState extends State<Home> {
                       },
                       style: const ButtonStyle(
                         foregroundColor:
-                            MaterialStatePropertyAll<Color?>(Colors.white),
+                            WidgetStatePropertyAll<Color?>(Colors.white),
                       ),
                       child: Text(authUser?.fullName?[0] ?? ''),
                     ),
@@ -49,7 +50,7 @@ class _HomeState extends State<Home> {
                       Navigator.pushNamed(context, '/settings');
                     },
                   ),
-                ]),
+                ],
               ),
             ),
             Padding(
