@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kapame/models/auth_response.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/app_user.dart';
@@ -38,47 +39,49 @@ class _EditProfileState extends State<EditProfile> {
     super.dispose();
   }
 
-  // Future<AuthResponse> updateUser() async {
-  //   final Dio dio = Dio();
+  Future<AppUser?> updateUser() async {
+    String? id = Provider.of<AuthUserState>(context, listen: false).appUser?.id;
 
-  //   dio.options.connectTimeout = const Duration(seconds: 30);
-  //   dio.options.receiveTimeout = const Duration(seconds: 30);
+    try {
+      final Dio dio = Dio();
 
-  //   setState(() {
-  //     isLoading = true;
-  //   });
+      dio.options.connectTimeout = const Duration(seconds: 30);
+      dio.options.receiveTimeout = const Duration(seconds: 30);
 
-  //   var res = await dio.post(
-  //     'https://kapameapi.azurewebsites.net/api/auth/${auth}',
-  //     data: {
-  //       "id": "",
-  //       "fullName": fullNameController.text.trim(),
-  //       "email": emailController.text.trim(),
-  //       "phoneNumber": phoneNumberController.text.trim(),
-  //     },
-  //   );
+      setState(() {
+        isLoading = true;
+      });
 
-  //   print(res.data);
-  //   print(res.data['message']);
-  //   print(res.data['user']);
+      var res = await dio.put(
+        'https://kapameapi.azurewebsites.net/api/auth/$id',
+        data: {
+          "userId": id,
+          "fullName": fullNameController.text.trim(),
+          "email": emailController.text.trim(),
+          "phoneNumber": phoneNumberController.text.trim(),
+        },
+      );
 
-  //   if (res.statusCode == 200) {
-  //     AuthResponse currentUser = AuthResponse(
-  //         res.data['message'],
-  //         res.data['isSuccess'],
-  //         res.data['token'],
-  //         res.data['errors'],
-  //         AppUser.fromMap(res.data['user']),
-  //         DateTime.parse(res.data['expireDate']));
+      print(res.data);
 
-  //     return currentUser;
-  //   } else {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //     throw Exception("Function cannot return null");
-  //   }
-  // }
+      if (res.statusCode == 200) {
+        return AppUser.fromMap(res.data);
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (e is DioException) {
+        print("error: $e");
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,38 +213,11 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                       FilledButton(
                         onPressed: () async {
-                          final Dio dio = Dio();
-
-                          dio.options.connectTimeout =
-                              const Duration(seconds: 30);
-                          dio.options.receiveTimeout =
-                              const Duration(seconds: 30);
-
-                          setState(() {
-                            isLoading = true;
-                          });
-                          print(authUser?.id);
-                          var res = await dio.put(
-                            'https://kapameapi.azurewebsites.net/api/auth/${authUser?.id}',
-                            data: {
-                              "userId": authUser?.id,
-                              "fullName": fullNameController.text.trim(),
-                              "email": emailController.text.trim(),
-                              "phoneNumber": phoneNumberController.text.trim(),
-                            },
-                          );
-                          print(res.data);
-                          print(res.statusCode);
-
-                          if (res.statusCode == 200) {
+                          AppUser? authUser = await updateUser();
+                          if (authUser != null) {
                             Provider.of<AuthUserState>(context, listen: false)
                                 .updateAuthUser(
-                              allAuth.message ?? '',
-                              allAuth.isSuccess ?? false,
-                              allAuth.token ?? '',
-                              allAuth.errors,
-                              AppUser.fromMap(res.data),
-                              allAuth.expireDate ?? DateTime.now(),
+                              inAppUser: authUser,
                             );
 
                             Fluttertoast.showToast(
@@ -249,19 +225,28 @@ class _EditProfileState extends State<EditProfile> {
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.BOTTOM,
                               timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.grey,
+                              backgroundColor: Colors.green,
                               textColor: Colors.white,
                               fontSize: 16.0,
                             );
-
-                            setState(() {
-                              isLoading = false;
-                            });
                           } else {
-                            setState(() {
-                              isLoading = false;
-                            });
+                            Fluttertoast.showToast(
+                              msg: "Failed to update profile. Please try again",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
                           }
+
+                          setState(() {
+                            isLoading = false;
+                          });
+
+                          print(
+                              "Updated User: ID: ${authUser?.id}, Name: ${authUser?.fullName}, Email: ${authUser?.email}, Phone: ${authUser?.phoneNumber}");
                         },
                         style: const ButtonStyle(
                           shape: WidgetStatePropertyAll(

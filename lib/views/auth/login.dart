@@ -152,12 +152,12 @@ class _LoginState extends State<Login> {
                                     Provider.of<AuthUserState>(context,
                                             listen: false)
                                         .updateAuthUser(
-                                            authRes!.message,
-                                            authRes.isSuccess,
-                                            authRes.token,
-                                            authRes.errors,
-                                            authRes.user,
-                                            authRes.expireDate ??
+                                            inMessage: authRes!.message,
+                                            inIsSuccess: authRes.isSuccess,
+                                            inToken: authRes.token,
+                                            inErrors: authRes.errors,
+                                            inAppUser: authRes.user,
+                                            inExpireDate: authRes.expireDate ??
                                                 DateTime.now());
                                     Navigator.pushReplacementNamed(
                                         context, '/home');

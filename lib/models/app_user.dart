@@ -22,14 +22,15 @@ class AppUser {
 
   factory AppUser.fromMap(Map<String, dynamic> map) {
     return AppUser(
-        dateOfBirth: DateTime.tryParse(map['dateOfBirth']),
-        gender: map['gender'],
-        userType: map['userType'],
-        subscription: map['subscription'],
-        transporter: map['transporter'],
-        id: map['id'],
-        fullName: map['fullName'],
-        email: map['email'],
-        phoneNumber: map['phoneNumber']);
+      dateOfBirth: DateTime.tryParse(map['dateOfBirth']),
+      gender: map['gender'],
+      userType: map['userType'],
+      subscription: map['subscription'],
+      transporter: map['transporter'],
+      id: map['id'],
+      fullName: map['fullName'],
+      email: map['email'],
+      phoneNumber: map['phoneNumber'],
+    );
   }
 }
