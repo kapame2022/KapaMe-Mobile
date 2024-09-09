@@ -74,12 +74,12 @@ class _PickUpState extends State<PickUp> {
                                   ['description'],
                               pickUpLatitude: coord.pickUpLatitude,
                               pickUpLongitude: coord.pickUpLongitude,
-                              destinationAddress:
-                                  '', // You might want to set this if applicable
-                              destinationLatitude:
-                                  '', // You might want to set this if applicable
-                              destinationLongitude:
-                                  '', // You might want to set this if applicable
+                              // destinationAddress:
+                              //     '', // You might want to set this if applicable
+                              // destinationLatitude:
+                              //     '', // You might want to set this if applicable
+                              // destinationLongitude:
+                              //     '', // You might want to set this if applicable
                             );
 
                             // Optionally, update the text field with the selected suggestion

@@ -70,21 +70,25 @@ class _DestinationState extends State<Destination> {
 
                             // Create a TripLocationInfo object
                             final tripLocationInfo = TripLocationInfo(
-                              pickUpAddress: '',
-                              pickUpLatitude: coord.pickUpLatitude,
-                              pickUpLongitude: coord.pickUpLongitude,
+                              // pickUpAddress: '',
+                              // pickUpLatitude: coord.pickUpLatitude,
+                              // pickUpLongitude: coord.pickUpLongitude,
                               destinationAddress: snapshot.data![index][
                                   'description'], // You might want to set this if applicable
-                              destinationLatitude: coord
-                                  .destinationLatitude, // You might want to set this if applicable
-                              destinationLongitude: coord
-                                  .destinationAddress, // You might want to set this if applicable
+                              destinationLatitude: coord.pickUpLatitude
+                                  .toString(), // You might want to set this if applicable
+                              destinationLongitude: coord.pickUpLongitude
+                                  .toString(), // You might want to set this if applicable
                             );
 
                             // Optionally, update the text field with the selected suggestion
                             destinationAddress.text =
                                 snapshot.data![index]['description'];
 
+                            print(
+                                "Latitude: ${tripLocationInfo.destinationLatitude}");
+                            print(
+                                "Longitude: ${tripLocationInfo.destinationLongitude}");
                             // Clear the suggestions list
                             setState(() {
                               suggestions = Future.value([]);

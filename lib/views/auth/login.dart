@@ -19,6 +19,7 @@ class _LoginState extends State<Login> {
   TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool obscureText = true;
 
   @override
   void dispose() {
@@ -83,13 +84,12 @@ class _LoginState extends State<Login> {
     return Scaffold(
       body: Center(
         child: Container(
-          color: const Color.fromARGB(255, 255, 253, 248),
           padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 30),
           child: SingleChildScrollView(
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Image.asset('assets/images/KapaMeLogo.png'),
+                  Image.asset('assets/images/KapaMeLogo.jpeg'),
                   Container(
                     margin:
                         const EdgeInsets.symmetric(horizontal: 0, vertical: 50),
@@ -125,17 +125,34 @@ class _LoginState extends State<Login> {
                               const SizedBox(height: 10),
                               TextFormField(
                                 controller: passwordController,
-                                obscureText: true,
-                                decoration: const InputDecoration(
-                                    hintText: 'Password',
-                                    border: OutlineInputBorder(
-                                        borderSide: BorderSide(width: 1),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10))),
-                                    focusedBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                            color: Colors.lightBlue,
-                                            width: 1))),
+                                obscureText: obscureText,
+                                decoration: InputDecoration(
+                                  hintText: 'Password',
+                                  border: const OutlineInputBorder(
+                                    borderSide: BorderSide(width: 1),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(10),
+                                    ),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Colors.lightBlue,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      obscureText
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        obscureText = !obscureText;
+                                      });
+                                    },
+                                  ),
+                                ),
                                 validator: (String? value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter some text';

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:kapame/models/auth_response.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/app_user.dart';

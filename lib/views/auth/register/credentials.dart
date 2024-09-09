@@ -4,17 +4,34 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class Credentials extends StatefulWidget {
-  const Credentials({super.key});
+  const Credentials({Key? key}) : super(key: key);
 
   @override
   State<Credentials> createState() => _CredentialsState();
 }
 
 class _CredentialsState extends State<Credentials> {
+  bool obscureText = true;
+  bool obscureText2 = true;
+  late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController passwordController = TextEditingController();
-    TextEditingController confirmPasswordController = TextEditingController();
     final newUser = Provider.of<UserState>(context, listen: false);
 
     void showTermsAndConditions() {
@@ -31,8 +48,10 @@ class _CredentialsState extends State<Credentials> {
                   Navigator.of(context).pop();
                   // Update user data in your state management solution
                   // For example, using Provider:
-                  Provider.of<UserState>(context, listen: false)
-                      .updateTermsAccepted(false);
+                  setState(() {
+                    Provider.of<UserState>(context, listen: false)
+                        .updateTermsAccepted(false);
+                  });
                 },
               ),
               TextButton(
@@ -41,8 +60,10 @@ class _CredentialsState extends State<Credentials> {
                   Navigator.of(context).pop();
                   // Update user data in your state management solution
                   // For example, using Provider:
-                  Provider.of<UserState>(context, listen: false)
-                      .updateTermsAccepted(true);
+                  setState(() {
+                    Provider.of<UserState>(context, listen: false)
+                        .updateTermsAccepted(true);
+                  });
                 },
               ),
             ],
@@ -56,19 +77,28 @@ class _CredentialsState extends State<Credentials> {
         const SizedBox(height: 30),
         TextFormField(
           controller: passwordController,
-          onChanged:
-              Provider.of<UserState>(context, listen: false).updatePassword,
-          obscureText: true,
-          decoration: const InputDecoration(
+          onChanged: (value) {
+            newUser.updatePassword(value);
+          },
+          obscureText: obscureText,
+          decoration: InputDecoration(
             hintText: 'Password',
-            border: OutlineInputBorder(
+            border: const OutlineInputBorder(
               borderSide: BorderSide(width: 1),
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.lightBlue, width: 1),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscureText ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  obscureText = !obscureText;
+                });
+              },
             ),
           ),
           validator: (String? value) {
@@ -81,21 +111,28 @@ class _CredentialsState extends State<Credentials> {
         const SizedBox(height: 10),
         TextFormField(
           controller: confirmPasswordController,
-          onChanged: Provider.of<UserState>(context, listen: false)
-              .updateConfirmPassword,
-          obscureText: true,
-          decoration: const InputDecoration(
+          onChanged: (value) {
+            newUser.updateConfirmPassword(value);
+          },
+          obscureText: obscureText2,
+          decoration: InputDecoration(
             hintText: 'Re-enter Password',
-            border: OutlineInputBorder(
+            border: const OutlineInputBorder(
               borderSide: BorderSide(width: 1),
-              borderRadius: BorderRadius.all(
-                Radius.circular(
-                  10,
-                ),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.lightBlue, width: 1),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscureText2 ? Icons.visibility_off : Icons.visibility,
+              ),
+              onPressed: () {
+                setState(() {
+                  obscureText2 = !obscureText2;
+                });
+              },
             ),
           ),
           validator: (String? value) {
@@ -131,8 +168,10 @@ class _CredentialsState extends State<Credentials> {
             Checkbox(
               value: newUser.termsAccepted,
               onChanged: (bool? value) {
-                Provider.of<UserState>(context, listen: false)
-                    .updateTermsAccepted(!newUser.termsAccepted);
+                setState(() {
+                  Provider.of<UserState>(context, listen: false)
+                      .updateTermsAccepted(value);
+                });
               },
             ),
             const Text('I Accept the Terms and Conditions'),

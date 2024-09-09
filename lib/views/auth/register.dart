@@ -251,7 +251,7 @@ class _RegisterState extends State<Register> {
               'transporter': null,
               //id: "",
               'fullName': newUser.fullName,
-              'userName': newUser.fullName,
+              'userName': newUser.fullName.replaceAll(' ', ''),
               'email': newUser.email,
               'phoneNumber': newUser.phoneNumber,
               'password': newUser.password,
@@ -271,6 +271,15 @@ class _RegisterState extends State<Register> {
           //   ),
           // );
           print(res.data);
+          Fluttertoast.showToast(
+            msg: "Trip Requested successfully!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
 
           await Navigator.pushReplacementNamed(context, '/verifyemail');
         } else {
@@ -283,6 +292,15 @@ class _RegisterState extends State<Register> {
       if (e is DioException) {
         print(e.response?.data);
         setState(() {
+          Fluttertoast.showToast(
+            msg: "Error submitting request. Please try again.",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
           isLoading = false;
         });
       }
@@ -314,7 +332,7 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
               child: Column(
                 children: [
-                  Image.asset('assets/images/KapaMeLogo.png'),
+                  Image.asset('assets/images/KapaMeLogo.jpeg'),
                   Center(
                     child: stepList[_currentStep],
                   ),

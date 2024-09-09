@@ -9,12 +9,11 @@ class LandingPage extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
-          color: const Color.fromARGB(255, 255, 253, 248),
           padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 30),
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Image.asset('assets/images/KapaMeLogo.png'),
+                Image.asset('assets/images/KapaMeLogo.jpeg'),
                 Container(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 0, vertical: 40),

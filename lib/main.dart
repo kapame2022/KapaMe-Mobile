@@ -16,7 +16,6 @@ import 'package:kapame/views/home/settings/popia_agreement.dart';
 import 'package:kapame/views/home/settings/privacy_policy.dart';
 import 'package:kapame/views/home/settings/terms_and_conditions.dart';
 import 'package:kapame/views/home/trip_history.dart';
-import 'package:kapame/views/home/view_request.dart';
 import 'package:kapame/views/trips/destination.dart';
 import 'package:kapame/views/trips/driver_tracker.dart';
 import 'package:kapame/views/trips/filter_destination.dart';
@@ -30,6 +29,7 @@ import 'package:kapame/views/trips/private_commuter.dart';
 import 'package:kapame/views/trips/private_driver.dart';
 import 'package:kapame/views/trips/public_commuter.dart';
 import 'package:kapame/views/trips/public_driver.dart';
+import 'package:kapame/views/trips/view_request.dart';
 import 'package:provider/provider.dart';
 import 'views/home/landing.dart';
 

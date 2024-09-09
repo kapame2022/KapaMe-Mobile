@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -179,6 +178,10 @@ class _GroupTransporterState extends State<GroupTransporter> {
         markers.add(
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
+            onTap: () {
+              Navigator.pushNamed(context, '/viewrequest',
+                  arguments: {"trip": trip});
+            },
             position: LatLng(
               double.parse(trip.tripLocationInfo!.pickUpLatitude!),
               double.parse(trip.tripLocationInfo!.pickUpLongitude!),

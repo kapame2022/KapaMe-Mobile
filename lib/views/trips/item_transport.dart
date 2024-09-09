@@ -113,70 +113,84 @@ class _ItemTransportState extends State<ItemTransport> {
   }
 
   Future<void> handleSubmit() async {
+    if (!_formKey.currentState!.validate()) {
+      Fluttertoast.showToast(
+        msg: "Please fill in all required fields correctly.",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
     try {
       AppUser? authUser =
           Provider.of<AuthUserState>(context, listen: false).appUser;
-      if (_formKey.currentState!.validate()) {
-        setState(() {
-          isLoading = false;
-        });
-      } else {
-        final Dio dio = Dio();
 
-        dio.options.connectTimeout = const Duration(seconds: 30);
-        dio.options.receiveTimeout = const Duration(seconds: 30);
+      if (authUser == null) {
+        throw Exception("User not authenticated");
+      }
 
-        setState(() {
-          isLoading = true;
-        });
+      final Dio dio = Dio();
+      dio.options.connectTimeout = const Duration(seconds: 30);
+      dio.options.receiveTimeout = const Duration(seconds: 30);
 
-        final newTrip = {
-          'requester': authUser?.id,
-          'transporter': null,
-          'tripType': 'Item Transport',
-          'tripStatus': 'Requested',
-          'tripLocationInfo': {
-            'pickUpAddress': pickUpController.text,
-            'pickUpLatitude': pickUpLat,
-            'pickUpLongitude': pickUpLong,
-            'destinationAddress': destinationController.text,
-            'destinationLatitude': destLat,
-            'destinationLongitude': destLong
+      final newTrip = {
+        'requester': authUser.id,
+        'transporter': null,
+        'tripType': 'Item Transport',
+        'tripStatus': 'Requested',
+        'tripLocationInfo': {
+          'pickUpAddress': pickUpController.text,
+          'pickUpLatitude': pickUpLat,
+          'pickUpLongitude': pickUpLong,
+          'destinationAddress': destinationController.text,
+          'destinationLatitude': destLat,
+          'destinationLongitude': destLong
+        },
+        'contactDetailsPhoneNumber': phoneNumberController.text,
+        'contactDetailsEmail': '', // Consider adding an email field if needed
+        'tripPriority': tripPriorityController.text,
+        'tripScheduling': tripScheduleController.text,
+        'tripLastingTime': tripDateTimeController.text,
+        'tripDateTime': tripDateTime?.toLocal().toIso8601String(),
+        'groupTransport': null,
+        'itemTransport': {'description': itemDescriptionController.text}
+      };
+
+      final response = await dio.post(
+        'https://kapameapi.azurewebsites.net/api/trips',
+        data: newTrip,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            // Add any necessary authentication headers here
           },
-          'contactDetailsPhoneNumber': phoneNumberController.text,
-          'contactDetailsEmail': emailController.text,
-          'tripPriority': tripPriorityController.text,
-          'tripScheduling': tripScheduleController.text,
-          'tripLastingTime': tripDateTimeController.text,
-          'tripDateTime': tripDateTime!.toLocal().toIso8601String(),
-          'groupTransport': null,
-          'itemTransport': {'description': itemDescriptionController.text}
-        };
+        ),
+      );
 
-        await dio.post('https://kapameapi.azurewebsites.net/api/trips',
-            data: newTrip);
-        setState(() {
-          isLoading = false;
-        });
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
 
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Fluttertoast.showToast(
-            msg: "Trip Requested successfully!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-            fontSize: 16.0);
+          msg: "Trip Requested successfully!",
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
+      } else {
+        throw Exception("Failed to create trip: ${response.statusCode}");
       }
     } catch (e) {
+      print("Error submitting request: $e");
       Fluttertoast.showToast(
-          msg: "Error submitting request. Please try again.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+        msg: "Error submitting request. Please try again.",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     } finally {
       setState(() {
         isLoading = false;
@@ -278,7 +292,7 @@ class _ItemTransportState extends State<ItemTransport> {
                               // Navigate to the second page
                               final result = await Navigator.pushNamed(
                                   context, '/destination') as TripLocationInfo?;
-
+                              print("Latitude: ${result?.destinationLatitude}");
                               if (result != null) {
                                 setState(() {
                                   destinationController.text =
