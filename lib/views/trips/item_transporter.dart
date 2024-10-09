@@ -28,33 +28,20 @@ class _ItemTransporterState extends State<ItemTransporter> {
   List<Trip> allTrips = [];
   Set<Marker> markers = {};
 
-  Future<void> selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: tripDateTime ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != tripDateTime) {
-      setState(() {
-        tripDateTime = picked;
-        tripDateTimeController.text = "${picked.toLocal()}".split(' ')[0];
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _getLocation();
+    _getTrips();
+    MobileAds.instance.initialize();
   }
 
   @override
   void dispose() {
     pickUpController.dispose();
     destinationController.dispose();
+    tripDateTimeController.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getLocation();
-    MobileAds.instance.initialize();
   }
 
   Future<void> _getLocation() async {
@@ -92,7 +79,6 @@ class _ItemTransporterState extends State<ItemTransporter> {
       final res =
           await dio.get('https://kapameapi.azurewebsites.net/api/trips');
       print('Response Status Code: ${res.statusCode}');
-      //print('Response Data: ${res.data}');
       if (res.statusCode == 200) {
         final List<dynamic> tripsJson = res.data;
         final trips = tripsJson.map((json) => Trip.fromMap(json)).toList();
@@ -109,11 +95,6 @@ class _ItemTransporterState extends State<ItemTransporter> {
   }
 
   void _applyFilters() {
-    // if (_formKey.currentState!.validate()) {
-    //   setState(() {
-    //     isLoading = true;
-    //   });
-
     List<Trip> filteredTrips = _filterTrips(
       pickUp: pickUpController.text,
       destination: destinationController.text,
@@ -126,7 +107,6 @@ class _ItemTransporterState extends State<ItemTransporter> {
       isLoading = false;
     });
     Navigator.pop(context); // Close the bottom sheet
-    // }
   }
 
   List<Trip> _filterTrips({
@@ -179,6 +159,21 @@ class _ItemTransporterState extends State<ItemTransporter> {
     });
   }
 
+  Future<void> selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: tripDateTime ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != tripDateTime) {
+      setState(() {
+        tripDateTime = picked;
+        tripDateTimeController.text = "${picked.toLocal()}".split(' ')[0];
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -188,18 +183,30 @@ class _ItemTransporterState extends State<ItemTransporter> {
             )
           : Stack(
               children: [
-                Positioned.fill(
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(currentLocation!.latitude!,
-                          currentLocation!.longitude!),
-                      zoom: 15,
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+                  height: MediaQuery.of(context).size.height *
+                      0.8, // 80% of the screen height
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(currentLocation!.latitude!,
+                            currentLocation!.longitude!),
+                        zoom: 15,
+                      ),
+                      onMapCreated: (GoogleMapController controller) {
+                        mapController = controller;
+                      },
+                      markers: markers,
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
                     ),
-                    onMapCreated: (GoogleMapController controller) {
-                      mapController = controller;
-                    },
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
                   ),
                 ),
               ],
@@ -224,9 +231,7 @@ class _ItemTransporterState extends State<ItemTransporter> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       Form(
                         key: _formKey,
                         child: Column(
@@ -238,14 +243,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                 hintText: 'Pick Up',
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(width: 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                      color: Colors.lightBlue,
-                                      width: 1), // Customize focused border
+                                      color: Colors.lightBlue, width: 1),
                                 ),
                               ),
                               validator: (String? value) {
@@ -258,14 +261,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
                             const SizedBox(height: 10),
                             TextFormField(
                               controller: destinationController,
-                              obscureText: true,
                               decoration: const InputDecoration(
                                 hintText: 'Destination',
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(width: 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
@@ -286,15 +287,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                 labelText: 'Select a date',
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(width: 1),
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: Colors.lightBlue,
-                                    width: 1,
-                                  ),
+                                      color: Colors.lightBlue, width: 1),
                                 ),
                               ),
                               readOnly: true,
@@ -310,23 +308,19 @@ class _ItemTransporterState extends State<ItemTransporter> {
                               style: const ButtonStyle(
                                 shape: WidgetStatePropertyAll(
                                   RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
                                   ),
                                 ),
                                 minimumSize: WidgetStatePropertyAll(
-                                  Size(double.infinity, 60),
-                                ),
+                                    Size(double.infinity, 60)),
                                 backgroundColor: WidgetStatePropertyAll(
-                                  Color.fromARGB(255, 241, 144, 47),
-                                ),
+                                    Color.fromARGB(255, 241, 144, 47)),
                               ),
                               child: isLoading
                                   ? const CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
+                                          Colors.white),
                                     )
                                   : const Text("Update Filter"),
                             ),
@@ -340,7 +334,7 @@ class _ItemTransporterState extends State<ItemTransporter> {
             },
           );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.filter_alt),
       ),
     );
   }

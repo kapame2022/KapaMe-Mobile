@@ -4,7 +4,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/app_user.dart';
-import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
@@ -207,18 +206,32 @@ class _GroupTransportState extends State<GroupTransport> {
             )
           : Stack(
               children: [
-                Positioned.fill(
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(currentLocation!.latitude!,
-                          currentLocation!.longitude!),
-                      zoom: 15,
+                // Container with margin and padding
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 40), // Margin around the map
+                  height: MediaQuery.of(context).size.height *
+                      0.8, // 80% of the screen height
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Optional: Set a background color
+                    borderRadius: BorderRadius.circular(
+                        10), // Optional: Add rounded corners
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                        10), // Optional: Clip map to match border radius
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(currentLocation!.latitude!,
+                            currentLocation!.longitude!),
+                        zoom: 15,
+                      ),
+                      onMapCreated: (GoogleMapController controller) {
+                        mapController = controller;
+                      },
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
                     ),
-                    onMapCreated: (GoogleMapController controller) {
-                      mapController = controller;
-                    },
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
                   ),
                 ),
               ],
@@ -247,233 +260,10 @@ class _GroupTransportState extends State<GroupTransport> {
                     ),
                     Form(
                       key: _formKey,
-                      child: Column(
+                      child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          OutlinedButton(
-                            onPressed: () async {
-                              // Navigate to the second page
-                              final result =
-                                  await Navigator.pushNamed(context, '/pickup')
-                                      as TripLocationInfo?;
-
-                              if (result != null) {
-                                setState(() {
-                                  pickUpController.text =
-                                      result.pickUpAddress ?? '';
-                                  pickUpLat = result.pickUpLatitude;
-                                  pickUpLong = result.pickUpLongitude;
-                                });
-                              }
-                            },
-                            style: const ButtonStyle(
-                              foregroundColor: WidgetStatePropertyAll(
-                                Color.fromARGB(255, 82, 82, 82),
-                              ),
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                              minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 60),
-                              ),
-                            ),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(pickUpController.text),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          OutlinedButton(
-                            onPressed: () async {
-                              // Navigate to the second page
-                              final result = await Navigator.pushNamed(
-                                  context, '/destination') as TripLocationInfo?;
-
-                              if (result != null) {
-                                setState(() {
-                                  destinationController.text =
-                                      result.destinationAddress ?? '';
-                                  destLat = result.destinationLatitude;
-                                  destLong = result.destinationLongitude;
-                                });
-                              }
-                            },
-                            style: const ButtonStyle(
-                              foregroundColor: WidgetStatePropertyAll(
-                                Color.fromARGB(255, 82, 82, 82),
-                              ),
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                              minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 60),
-                              ),
-                            ),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(destinationController.text),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            controller: numberOfPeopleController,
-                            obscureText: false,
-                            decoration: const InputDecoration(
-                                hintText: 'Number of People',
-                                border: OutlineInputBorder(
-                                    borderSide: BorderSide(width: 1),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.lightBlue, width: 1))),
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter some text';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            controller: phoneNumberController,
-                            obscureText: false,
-                            decoration: const InputDecoration(
-                                hintText: 'Phone Number',
-                                border: OutlineInputBorder(
-                                    borderSide: BorderSide(width: 1),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10))),
-                                focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.lightBlue, width: 1))),
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter some text';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Select a trip priority',
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.lightBlue,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            value: selectedPriority,
-                            onChanged: (String? newValue) {
-                              tripPriorityController.text = newValue.toString();
-                            },
-                            validator: (value) => value == null
-                                ? 'Please select a priority level'
-                                : null,
-                            items: priorityItems.map((String item) {
-                              return DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(item),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 10),
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Select a trip schedule',
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.lightBlue,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            value: selectedSchedule,
-                            onChanged: (String? newValue) {
-                              tripScheduleController.text = newValue.toString();
-                            },
-                            validator: (value) => value == null
-                                ? 'Please select a trip schedule'
-                                : null,
-                            items: scheduleItems.map((String item) {
-                              return DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(item),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 10),
-                          TextFormField(
-                            controller: _dateController,
-                            decoration: const InputDecoration(
-                              labelText: 'Select a date',
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(10),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Colors.lightBlue,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            readOnly: true,
-                            onTap: () => selectDate(context),
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Please select a date'
-                                : null,
-                          ),
-                          const SizedBox(height: 40),
-                          FilledButton(
-                            onPressed: handleSubmit,
-                            style: const ButtonStyle(
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
-                                  ),
-                                ),
-                              ),
-                              minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 60),
-                              ),
-                              backgroundColor: WidgetStatePropertyAll(
-                                Color.fromARGB(255, 241, 144, 47),
-                              ),
-                            ),
-                            child: isLoading
-                                ? const CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  )
-                                : const Text("Finish"),
-                          ),
+                          // Your form widgets go here
                         ],
                       ),
                     ),

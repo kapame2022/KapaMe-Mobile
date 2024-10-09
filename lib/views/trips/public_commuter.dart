@@ -28,17 +28,17 @@ class _PublicCommuterState extends State<PublicCommuter> {
   bool isComplete = false;
 
   @override
-  void dispose() {
-    destinationController.dispose();
-    super.dispose();
-  }
-
-  @override
   void initState() {
     super.initState();
     _getLocation();
     MobileAds.instance.initialize();
     destinationController.text = 'Destination';
+  }
+
+  @override
+  void dispose() {
+    destinationController.dispose();
+    super.dispose();
   }
 
   Future<void> _getLocation() async {
@@ -147,23 +147,32 @@ class _PublicCommuterState extends State<PublicCommuter> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: currentLocation == null
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
-                Positioned.fill(
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(currentLocation!.latitude!,
-                          currentLocation!.longitude!),
-                      zoom: 15,
+                Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+                  height: MediaQuery.of(context).size.height *
+                      0.8, // 80% of the screen height
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(currentLocation!.latitude!,
+                            currentLocation!.longitude!),
+                        zoom: 15,
+                      ),
+                      onMapCreated: (GoogleMapController controller) {
+                        mapController = controller;
+                      },
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
                     ),
-                    onMapCreated: (GoogleMapController controller) {
-                      mapController = controller;
-                    },
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
                   ),
                 ),
               ],
@@ -179,87 +188,82 @@ class _PublicCommuterState extends State<PublicCommuter> {
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
-                  child: Column(children: [
-                    const Text(
-                      'Public Commuter Request',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Public Commuter Request',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          OutlinedButton(
-                            onPressed: () async {
-                              // Navigate to the second page
-                              final result = await Navigator.pushNamed(
-                                  context, '/destination') as TripLocationInfo?;
+                      const SizedBox(height: 20),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            OutlinedButton(
+                              onPressed: () async {
+                                // Navigate to the second page
+                                final result = await Navigator.pushNamed(
+                                        context, '/destination')
+                                    as TripLocationInfo?;
 
-                              if (result != null) {
-                                setState(() {
-                                  destinationController.text =
-                                      result.destinationAddress ?? '';
-                                  destLat = result.destinationLatitude;
-                                  destLong = result.destinationLongitude;
-                                });
-                              }
-                            },
-                            style: const ButtonStyle(
-                              foregroundColor: WidgetStatePropertyAll(
-                                Color.fromARGB(255, 82, 82, 82),
-                              ),
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
+                                if (result != null) {
+                                  setState(() {
+                                    destinationController.text =
+                                        result.destinationAddress ?? '';
+                                    destLat = result.destinationLatitude;
+                                    destLong = result.destinationLongitude;
+                                  });
+                                }
+                              },
+                              style: const ButtonStyle(
+                                foregroundColor: WidgetStatePropertyAll(
+                                  Color.fromARGB(255, 82, 82, 82),
+                                ),
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
                                   ),
                                 ),
+                                minimumSize: WidgetStatePropertyAll(
+                                    Size(double.infinity, 60)),
                               ),
-                              minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 60),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(destinationController.text),
                               ),
                             ),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(destinationController.text),
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                          FilledButton(
-                            onPressed: handleSubmit,
-                            style: const ButtonStyle(
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(10),
+                            const SizedBox(height: 40),
+                            FilledButton(
+                              onPressed: handleSubmit,
+                              style: const ButtonStyle(
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10)),
                                   ),
                                 ),
+                                minimumSize: WidgetStatePropertyAll(
+                                    Size(double.infinity, 60)),
+                                backgroundColor: WidgetStatePropertyAll(
+                                    Color.fromARGB(255, 241, 144, 47)),
                               ),
-                              minimumSize: WidgetStatePropertyAll(
-                                Size(double.infinity, 60),
-                              ),
-                              backgroundColor: WidgetStatePropertyAll(
-                                Color.fromARGB(255, 241, 144, 47),
-                              ),
+                              child: isLoading
+                                  ? const CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
+                                  : const Text("Finish"),
                             ),
-                            child: isLoading
-                                ? const CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  )
-                                : const Text("Finish"),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ]),
+                    ],
+                  ),
                 ),
               );
             },

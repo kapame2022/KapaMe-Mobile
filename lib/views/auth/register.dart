@@ -332,7 +332,7 @@ class _RegisterState extends State<Register> {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
               child: Column(
                 children: [
-                  Image.asset('assets/images/KapaMeLogo.jpeg'),
+                  Image.asset('assets/images/KapaMeLogo.png'),
                   Center(
                     child: stepList[_currentStep],
                   ),

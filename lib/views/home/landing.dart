@@ -13,7 +13,7 @@ class LandingPage extends StatelessWidget {
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Image.asset('assets/images/KapaMeLogo.jpeg'),
+                Image.asset('assets/images/KapaMeLogo.png'),
                 Container(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 0, vertical: 40),
