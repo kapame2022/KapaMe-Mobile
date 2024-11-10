@@ -23,8 +23,8 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   List<Widget> stepList = [
-    const Bio(),
     const ContactInfo(),
+    const Bio(),
     const Credentials(),
   ];
 
@@ -34,8 +34,8 @@ class _RegisterState extends State<Register> {
   //Stepper Navigation
   void goToNextStep() {
     final newUser = Provider.of<UserState>(context, listen: false);
-    if (_currentStep == 0 && !validateBioStep(newUser)) return;
-    if (_currentStep == 1 && !validateContactStep(newUser)) return;
+    if (_currentStep == 0 && !validateContactStep(newUser)) return;
+    if (_currentStep == 1 && !validateBioStep(newUser)) return;
     if (_currentStep == 2 && !validateCredentialsStep(newUser)) return;
     setState(() {
       if (_currentStep <= 2) {

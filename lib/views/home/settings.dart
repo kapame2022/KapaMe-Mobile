@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kapame/services/auth.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
@@ -121,6 +122,30 @@ class Settings extends StatelessWidget {
                         ),
                       ),
                       child: const Text("Disclaimer"),
+                    ),
+                  ),
+                  Container(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+                    child: FilledButton(
+                      onPressed: () {
+                        AuthService authService = AuthService();
+                        authService.logout();
+                        Navigator.pushNamed(context, '/');
+                      },
+                      style: ButtonStyle(
+                        backgroundColor:
+                            const WidgetStatePropertyAll<Color>(Colors.blue),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        minimumSize: const WidgetStatePropertyAll(
+                          Size.fromHeight(60),
+                        ),
+                      ),
+                      child: const Text("Logout"),
                     ),
                   ),
                 ],

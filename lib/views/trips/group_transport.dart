@@ -209,29 +209,26 @@ class _GroupTransportState extends State<GroupTransport> {
                 // Container with margin and padding
                 Container(
                   margin: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 40), // Margin around the map
+                      horizontal: 0, vertical: 25), // Margin around the map
                   height: MediaQuery.of(context).size.height *
-                      0.8, // 80% of the screen height
+                      0.85, // 80% of the screen height
                   decoration: BoxDecoration(
                     color: Colors.white, // Optional: Set a background color
                     borderRadius: BorderRadius.circular(
-                        10), // Optional: Add rounded corners
+                      10,
+                    ), // Optional: Add rounded corners
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                        10), // Optional: Clip map to match border radius
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(currentLocation!.latitude!,
-                            currentLocation!.longitude!),
-                        zoom: 15,
-                      ),
-                      onMapCreated: (GoogleMapController controller) {
-                        mapController = controller;
-                      },
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(currentLocation!.latitude!,
+                          currentLocation!.longitude!),
+                      zoom: 15,
                     ),
+                    onMapCreated: (GoogleMapController controller) {
+                      mapController = controller;
+                    },
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
                   ),
                 ),
               ],
@@ -273,8 +270,9 @@ class _GroupTransportState extends State<GroupTransport> {
             },
           );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.create),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }

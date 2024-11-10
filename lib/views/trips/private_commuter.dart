@@ -210,30 +210,26 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 40,
+                    horizontal: 0,
+                    vertical: 25,
                   ),
                   height: MediaQuery.of(context).size.height *
-                      0.8, // Limits the map height to 80% of the screen height
+                      0.85, // Limits the map height to 80% of the screen height
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(
                         10), // Optional: Adds rounded corners
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                        10), // Clips the map to have rounded corners
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(currentLocation!.latitude!,
-                            currentLocation!.longitude!),
-                        zoom: 15,
-                      ),
-                      onMapCreated: (GoogleMapController controller) {
-                        mapController = controller;
-                      },
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
+                  child: GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(currentLocation!.latitude!,
+                          currentLocation!.longitude!),
+                      zoom: 15,
                     ),
+                    onMapCreated: (GoogleMapController controller) {
+                      mapController = controller;
+                    },
+                    myLocationEnabled: true,
+                    myLocationButtonEnabled: true,
                   ),
                 ),
               ],
@@ -275,8 +271,9 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
             },
           );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.create),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }

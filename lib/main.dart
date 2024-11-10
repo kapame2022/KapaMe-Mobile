@@ -33,11 +33,17 @@ import 'package:kapame/views/trips/view_request.dart';
 import 'package:provider/provider.dart';
 import 'views/home/landing.dart';
 
-void main() {
-  runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => UserState()),
-    ChangeNotifierProvider(create: (context) => AuthUserState()),
-  ], child: const MyApp()));
+void main() async {
+  // Initialize the necessary services
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserState()),
+        ChangeNotifierProvider(create: (context) => AuthUserState()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -80,7 +86,7 @@ class MyApp extends StatelessWidget {
         '/privatecommuter': (context) => const PrivateCommuter(),
         '/privatedriver': (context) => const PrivateDriver(),
         '/publiccommuter': (context) => const PublicCommuter(),
-        '/publicdriver': (context) => const PublicDriver()
+        '/publicdriver': (context) => const PublicDriver(),
       },
     );
   }

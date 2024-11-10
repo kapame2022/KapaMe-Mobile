@@ -12,7 +12,7 @@ class TripServices {
     }
 
     final Uri requestUrl = Uri.parse(
-        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=address');
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$apiKey&types=address&components=country:ZA');
 
     final Response response = await dio.get(requestUrl.toString());
 
