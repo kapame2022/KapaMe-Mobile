@@ -210,7 +210,9 @@ class _GroupTransportState extends State<GroupTransport> {
                 // Container with margin and padding
                 Container(
                   margin: const EdgeInsets.symmetric(
-                      horizontal: 0, vertical: 25), // Margin around the map
+                    horizontal: 0,
+                    vertical: 25,
+                  ), // Margin around the map
                   height: MediaQuery.of(context).size.height *
                       0.85, // 80% of the screen height
                   decoration: BoxDecoration(

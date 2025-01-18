@@ -22,12 +22,18 @@ class _PublicDriverState extends State<PublicDriver> {
   Set<Marker> markers = {};
   List<Trip> allTrips = [];
 
+  String? pickUpLat;
+  String? pickUpLong;
+  String? destLat;
+  String? destLong;
+
   @override
   void initState() {
     super.initState();
     _getLocation();
     _getTrips();
     MobileAds.instance.initialize();
+    destinationController.text = 'Destination';
   }
 
   @override
@@ -145,13 +151,15 @@ class _PublicDriverState extends State<PublicDriver> {
           : Stack(
               children: [
                 Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 0, vertical: 25), // Margin around the map
                   height: MediaQuery.of(context).size.height *
-                      0.8, // 80% of the screen height
+                      0.85, // 80% of the screen height
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white, // Optional: Set a background color
+                    borderRadius: BorderRadius.circular(
+                      10,
+                    ), // Optional: Add rounded corners
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
@@ -170,89 +178,118 @@ class _PublicDriverState extends State<PublicDriver> {
                     ),
                   ),
                 ),
-              ],
-            ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue[200],
-        foregroundColor: Colors.white,
-        onPressed: () {
-          showModalBottomSheet<void>(
-            context: context,
-            builder: (BuildContext context) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Public Commuter Filters',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            TextFormField(
-                              controller: destinationController,
-                              decoration: const InputDecoration(
-                                hintText: 'Destination',
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(width: 1),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.lightBlue, width: 1),
-                                ),
-                              ),
-                              validator: (String? value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter some text';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 40),
-                            FilledButton(
-                              onPressed: _applyFilters,
-                              style: const ButtonStyle(
-                                shape: WidgetStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
+                Positioned(
+                  bottom: 45,
+                  left: 20,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.blue[200],
+                    foregroundColor: Colors.white,
+                    onPressed: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 40, horizontal: 25),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'Public Commuter Filters',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                minimumSize: WidgetStatePropertyAll(
-                                    Size(double.infinity, 60)),
-                                backgroundColor: WidgetStatePropertyAll(
-                                    Color.fromARGB(255, 241, 144, 47)),
+                                  const SizedBox(height: 20),
+                                  Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        OutlinedButton(
+                                          onPressed: () async {
+                                            final result =
+                                                await Navigator.pushNamed(
+                                                        context, '/destination')
+                                                    as TripLocationInfo?;
+                                            if (result != null) {
+                                              setState(() {
+                                                destinationController.text =
+                                                    result.destinationAddress ??
+                                                        '';
+                                                destLat =
+                                                    result.destinationLatitude;
+                                                destLong =
+                                                    result.destinationLongitude;
+                                              });
+                                            }
+                                          },
+                                          style: const ButtonStyle(
+                                            foregroundColor:
+                                                WidgetStatePropertyAll(
+                                              Color.fromARGB(255, 82, 82, 82),
+                                            ),
+                                            shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(10),
+                                                ),
+                                              ),
+                                            ),
+                                            minimumSize: WidgetStatePropertyAll(
+                                              Size(double.infinity, 60),
+                                            ),
+                                          ),
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                                destinationController.text),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 40),
+                                        FilledButton(
+                                          onPressed: _applyFilters,
+                                          style: const ButtonStyle(
+                                            shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(10),
+                                                ),
+                                              ),
+                                            ),
+                                            minimumSize: WidgetStatePropertyAll(
+                                              Size(double.infinity, 60),
+                                            ),
+                                            backgroundColor:
+                                                WidgetStatePropertyAll(
+                                              Color.fromARGB(255, 241, 144, 47),
+                                            ),
+                                          ),
+                                          child: isLoading
+                                              ? const CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(Colors.white),
+                                                )
+                                              : const Text("Apply Filters"),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: isLoading
-                                  ? const CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
-                                    )
-                                  : const Text("Apply Filters"),
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Icon(Icons.filter_alt),
                   ),
                 ),
-              );
-            },
-          );
-        },
-        child: const Icon(Icons.filter_alt),
-      ),
+              ],
+            ),
     );
   }
 }

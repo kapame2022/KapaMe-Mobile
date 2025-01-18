@@ -29,12 +29,19 @@ class _GroupTransporterState extends State<GroupTransporter> {
   Set<Marker> markers = {};
   List<Trip> allTrips = [];
 
+  String? pickUpLat;
+  String? pickUpLong;
+  String? destLat;
+  String? destLong;
+
   @override
   void initState() {
     super.initState();
     _getLocation();
     _getTrips();
     MobileAds.instance.initialize();
+    pickUpController.text = 'Pick Up';
+    destinationController.text = 'Destination';
   }
 
   @override
@@ -201,7 +208,9 @@ class _GroupTransporterState extends State<GroupTransporter> {
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(
-                      horizontal: 0, vertical: 25), // Margin around the map
+                    horizontal: 0,
+                    vertical: 25,
+                  ), // Margin around the map
                   height: MediaQuery.of(context).size.height *
                       0.85, // 80% of the screen height
                   decoration: BoxDecoration(
@@ -257,53 +266,85 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
-                                        TextFormField(
-                                          controller: pickUpController,
-                                          decoration: const InputDecoration(
-                                            hintText:
-                                                'Enter your pick up location',
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide(width: 1),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10)),
+                                        OutlinedButton(
+                                          onPressed: () async {
+                                            final result =
+                                                await Navigator.pushNamed(
+                                                        context, '/pickup')
+                                                    as TripLocationInfo?;
+                                            if (result != null) {
+                                              setState(() {
+                                                pickUpController.text =
+                                                    result.pickUpAddress ?? '';
+                                                pickUpLat =
+                                                    result.pickUpLatitude;
+                                                pickUpLong =
+                                                    result.pickUpLongitude;
+                                              });
+                                            }
+                                          },
+                                          style: const ButtonStyle(
+                                            foregroundColor:
+                                                WidgetStatePropertyAll(
+                                              Color.fromARGB(255, 82, 82, 82),
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.lightBlue,
-                                                  width: 1),
+                                            shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(10),
+                                                ),
+                                              ),
+                                            ),
+                                            minimumSize: WidgetStatePropertyAll(
+                                              Size(double.infinity, 60),
                                             ),
                                           ),
-                                          validator: (String? value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'Please enter some text';
-                                            }
-                                            return null;
-                                          },
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(pickUpController.text),
+                                          ),
                                         ),
                                         const SizedBox(height: 10),
-                                        TextFormField(
-                                          controller: destinationController,
-                                          decoration: const InputDecoration(
-                                            hintText: 'Destination',
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide(width: 1),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10)),
+                                        // Destination button
+                                        OutlinedButton(
+                                          onPressed: () async {
+                                            final result =
+                                                await Navigator.pushNamed(
+                                                        context, '/destination')
+                                                    as TripLocationInfo?;
+                                            if (result != null) {
+                                              setState(() {
+                                                destinationController.text =
+                                                    result.destinationAddress ??
+                                                        '';
+                                                destLat =
+                                                    result.destinationLatitude;
+                                                destLong =
+                                                    result.destinationLongitude;
+                                              });
+                                            }
+                                          },
+                                          style: const ButtonStyle(
+                                            foregroundColor:
+                                                WidgetStatePropertyAll(
+                                              Color.fromARGB(255, 82, 82, 82),
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.lightBlue,
-                                                  width: 1),
+                                            shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(10),
+                                                ),
+                                              ),
+                                            ),
+                                            minimumSize: WidgetStatePropertyAll(
+                                              Size(double.infinity, 60),
                                             ),
                                           ),
-                                          validator: (String? value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'Please enter some text';
-                                            }
-                                            return null;
-                                          },
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                                destinationController.text),
+                                          ),
                                         ),
                                         const SizedBox(height: 10),
                                         TextFormField(

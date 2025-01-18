@@ -68,8 +68,8 @@ class _BioState extends State<Bio> {
             hint: const Text('Select gender'),
             value: selectedGender,
             onChanged: (String? newValue) {
-              String gender =
-                  Provider.of<UserState>(context, listen: false).gender;
+              // String gender =
+              //     Provider.of<UserState>(context, listen: false).gender;
               Provider.of<UserState>(context, listen: false)
                   .updateGender(newValue ?? '');
             },

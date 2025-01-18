@@ -151,20 +151,26 @@ class _PublicCommuterState extends State<PublicCommuter> {
           : Stack(
               children: [
                 Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 0,
+                    vertical: 25,
+                  ), // Margin around the map
                   height: MediaQuery.of(context).size.height *
-                      0.8, // 80% of the screen height
+                      0.85, // 80% of the screen height
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white, // Optional: Set a background color
+                    borderRadius: BorderRadius.circular(
+                      10,
+                    ), // Optional: Add rounded corners
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(currentLocation!.latitude!,
-                            currentLocation!.longitude!),
+                        target: LatLng(
+                          currentLocation!.latitude!,
+                          currentLocation!.longitude!,
+                        ),
                         zoom: 15,
                       ),
                       onMapCreated: (GoogleMapController controller) {
@@ -175,102 +181,116 @@ class _PublicCommuterState extends State<PublicCommuter> {
                     ),
                   ),
                 ),
-              ],
-            ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue[200],
-        foregroundColor: Colors.white,
-        onPressed: () {
-          showModalBottomSheet<void>(
-            context: context,
-            builder: (BuildContext context) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Public Commuter Request',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            OutlinedButton(
-                              onPressed: () async {
-                                // Navigate to the second page
-                                final result = await Navigator.pushNamed(
-                                        context, '/destination')
-                                    as TripLocationInfo?;
+                Positioned(
+                  bottom: 45,
+                  left: 20,
+                  child: FloatingActionButton(
+                    backgroundColor: Colors.blue[200],
+                    foregroundColor: Colors.white,
+                    onPressed: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 40, horizontal: 25),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'Public Commuter Request',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Form(
+                                    key: _formKey,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        OutlinedButton(
+                                          onPressed: () async {
+                                            // Navigate to the second page
+                                            final result =
+                                                await Navigator.pushNamed(
+                                                        context, '/destination')
+                                                    as TripLocationInfo?;
 
-                                if (result != null) {
-                                  setState(() {
-                                    destinationController.text =
-                                        result.destinationAddress ?? '';
-                                    destLat = result.destinationLatitude;
-                                    destLong = result.destinationLongitude;
-                                  });
-                                }
-                              },
-                              style: const ButtonStyle(
-                                foregroundColor: WidgetStatePropertyAll(
-                                  Color.fromARGB(255, 82, 82, 82),
-                                ),
-                                shape: WidgetStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
+                                            if (result != null) {
+                                              setState(() {
+                                                destinationController.text =
+                                                    result.destinationAddress ??
+                                                        '';
+                                                destLat =
+                                                    result.destinationLatitude;
+                                                destLong =
+                                                    result.destinationLongitude;
+                                              });
+                                            }
+                                          },
+                                          style: const ButtonStyle(
+                                            foregroundColor:
+                                                WidgetStatePropertyAll(
+                                              Color.fromARGB(255, 82, 82, 82),
+                                            ),
+                                            shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
+                                              ),
+                                            ),
+                                            minimumSize: WidgetStatePropertyAll(
+                                                Size(double.infinity, 60)),
+                                          ),
+                                          child: Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(
+                                                destinationController.text),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 40),
+                                        FilledButton(
+                                          onPressed: handleSubmit,
+                                          style: const ButtonStyle(
+                                            shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
+                                              ),
+                                            ),
+                                            minimumSize: WidgetStatePropertyAll(
+                                                Size(double.infinity, 60)),
+                                            backgroundColor:
+                                                WidgetStatePropertyAll(
+                                                    Color.fromARGB(
+                                                        255, 241, 144, 47)),
+                                          ),
+                                          child: isLoading
+                                              ? const CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(Colors.white),
+                                                )
+                                              : const Text("Finish"),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                minimumSize: WidgetStatePropertyAll(
-                                    Size(double.infinity, 60)),
-                              ),
-                              child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(destinationController.text),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 40),
-                            FilledButton(
-                              onPressed: handleSubmit,
-                              style: const ButtonStyle(
-                                shape: WidgetStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                                minimumSize: WidgetStatePropertyAll(
-                                    Size(double.infinity, 60)),
-                                backgroundColor: WidgetStatePropertyAll(
-                                    Color.fromARGB(255, 241, 144, 47)),
-                              ),
-                              child: isLoading
-                                  ? const CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white),
-                                    )
-                                  : const Text("Finish"),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Icon(Icons.add),
                   ),
                 ),
-              );
-            },
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+              ],
+            ),
     );
   }
 }
