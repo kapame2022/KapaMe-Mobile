@@ -66,11 +66,6 @@ class LandingPage extends StatelessWidget {
               ]),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.question_mark),
-      ),
     );
   }
 }

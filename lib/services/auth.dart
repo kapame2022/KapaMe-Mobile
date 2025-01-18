@@ -53,7 +53,7 @@ class AuthService extends ChangeNotifier {
         );
 
         await _saveSession(currentUser);
-        print(currentUser.user?.fullName);
+        print(currentUser.user.fullName);
         _isLoading = false;
         notifyListeners();
         return true;

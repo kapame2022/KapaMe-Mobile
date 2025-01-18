@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/auth_response.dart';
 import 'package:kapame/services/current_user.dart';
@@ -19,6 +20,7 @@ class _LoginState extends State<Login> {
   TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool isSuccess = false;
   bool obscureText = true;
 
   @override
@@ -55,12 +57,17 @@ class _LoginState extends State<Login> {
 
       if (res.statusCode == 200) {
         AuthResponse currentUser = AuthResponse(
-            res.data['message'],
-            res.data['isSuccess'],
-            res.data['token'],
-            res.data['errors'],
-            AppUser.fromMap(res.data['user']),
-            DateTime.parse(res.data['expireDate']));
+          res.data['message'],
+          res.data['isSuccess'],
+          res.data['token'],
+          res.data['errors'],
+          AppUser.fromMap(res.data['user']),
+          DateTime.parse(res.data['expireDate']),
+        );
+
+        setState(() {
+          isSuccess = true;
+        });
 
         return currentUser;
       }
@@ -69,6 +76,13 @@ class _LoginState extends State<Login> {
       setState(() {
         isLoading = false;
       });
+      if (e is DioException) {
+        Fluttertoast.showToast(
+          msg: e.response!.data['message'],
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+      }
       return null;
     } finally {
       setState(() {
@@ -180,19 +194,21 @@ class _LoginState extends State<Login> {
                                         context, '/home');
                                   }
                                 },
-                                style: const ButtonStyle(
-                                  shape: WidgetStatePropertyAll(
+                                style: ButtonStyle(
+                                  shape: const WidgetStatePropertyAll(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.all(
                                         Radius.circular(10),
                                       ),
                                     ),
                                   ),
-                                  minimumSize: WidgetStatePropertyAll(
+                                  minimumSize: const WidgetStatePropertyAll(
                                     Size(double.infinity, 60),
                                   ),
                                   backgroundColor: WidgetStatePropertyAll(
-                                    Color.fromARGB(255, 72, 72, 72),
+                                    isSuccess
+                                        ? Colors.green
+                                        : const Color.fromARGB(255, 72, 72, 72),
                                   ),
                                 ),
                                 child: isLoading
@@ -212,11 +228,6 @@ class _LoginState extends State<Login> {
                 ]),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.question_mark),
       ),
     );
   }
