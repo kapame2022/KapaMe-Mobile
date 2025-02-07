@@ -252,11 +252,16 @@ class _HomeState extends State<Home> {
               children: [
                 const Text(
                   "Public Transporter",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 0,
+                    vertical: 10,
+                  ),
                   child: Wrap(
                     children: [
                       Padding(
@@ -267,8 +272,8 @@ class _HomeState extends State<Home> {
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
-                            height: 110,
-                            width: 110,
+                            height: 100,
+                            width: 100,
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(10),
@@ -292,8 +297,8 @@ class _HomeState extends State<Home> {
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),
-                            height: 110,
-                            width: 110,
+                            height: 100,
+                            width: 100,
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(10),
