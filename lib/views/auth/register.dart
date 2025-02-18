@@ -30,6 +30,7 @@ class _RegisterState extends State<Register> {
 
   int _currentStep = 0;
   bool isLoading = false;
+  bool isComplete = false;
 
   //Stepper Navigation
   void goToNextStep() {
@@ -80,19 +81,19 @@ class _RegisterState extends State<Register> {
         onPressed: () async {
           await registerUser(context);
         },
-        style: const ButtonStyle(
-          shape: WidgetStatePropertyAll(
+        style: ButtonStyle(
+          shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(10),
               ),
             ),
           ),
-          minimumSize: WidgetStatePropertyAll(
+          minimumSize: const WidgetStatePropertyAll(
             Size(double.infinity, 60),
           ),
           backgroundColor: WidgetStatePropertyAll(
-            Color.fromARGB(255, 72, 72, 72),
+            isComplete ? Colors.green : const Color.fromARGB(255, 72, 72, 72),
           ),
         ),
         child: isLoading
@@ -187,6 +188,10 @@ class _RegisterState extends State<Register> {
       return false;
     }
 
+    setState(() {
+      isComplete = true;
+    });
+
     return true;
   }
 
@@ -227,6 +232,20 @@ class _RegisterState extends State<Register> {
     }
 
     return true;
+  }
+
+  void checkFormCompletion() {
+    final newUser = Provider.of<UserState>(context, listen: false);
+    bool complete = false;
+
+    if (_currentStep == 2) {
+      complete =
+          newUser.password.isNotEmpty && newUser.confirmPassword.isNotEmpty;
+    }
+
+    setState(() {
+      isComplete = complete;
+    });
   }
 
   Future registerUser(BuildContext context) async {

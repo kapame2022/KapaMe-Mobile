@@ -21,6 +21,7 @@ class _LoginState extends State<Login> {
 
   bool isLoading = false;
   bool isSuccess = false;
+  bool isComplete = false;
   bool obscureText = true;
 
   @override
@@ -92,6 +93,24 @@ class _LoginState extends State<Login> {
     return null;
   }
 
+  //Function that checks what the status of an input
+  //for username and password
+  bool formComplete(String value) {
+    //Validate the status of the required inputs
+    // Check if both username and password fields are not empty
+    if (usernameController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty) {
+      setState(() {
+        isComplete = true;
+      });
+    } else {
+      setState(() {
+        isComplete = false;
+      });
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -117,6 +136,7 @@ class _LoginState extends State<Login> {
                             children: <Widget>[
                               TextFormField(
                                 controller: usernameController,
+                                onChanged: formComplete,
                                 decoration: const InputDecoration(
                                   hintText: 'Enter your email',
                                   border: OutlineInputBorder(
@@ -139,6 +159,7 @@ class _LoginState extends State<Login> {
                               const SizedBox(height: 10),
                               TextFormField(
                                 controller: passwordController,
+                                onChanged: formComplete,
                                 obscureText: obscureText,
                                 decoration: InputDecoration(
                                   hintText: 'Password',
@@ -206,7 +227,7 @@ class _LoginState extends State<Login> {
                                     Size(double.infinity, 60),
                                   ),
                                   backgroundColor: WidgetStatePropertyAll(
-                                    isSuccess
+                                    isComplete
                                         ? Colors.green
                                         : const Color.fromARGB(255, 72, 72, 72),
                                   ),

@@ -9,6 +9,7 @@ class UserState extends ChangeNotifier {
   String _password = '';
   String _confirmPassword = '';
   bool? _termsAccepted = false;
+  bool _formComplete = false;
 
   DateTime get dateOfBirth => _dateOfBirth;
   String get gender => _gender;
@@ -18,6 +19,7 @@ class UserState extends ChangeNotifier {
   String get password => _password;
   String get confirmPassword => _confirmPassword;
   bool? get termsAccepted => _termsAccepted;
+  bool get formComplete => _formComplete;
 
   void updateDateOfBirth(DateTime newDateOfBirth) {
     _dateOfBirth = newDateOfBirth;
@@ -56,6 +58,11 @@ class UserState extends ChangeNotifier {
 
   void updateTermsAccepted(bool? newTermsAccepted) {
     _termsAccepted = newTermsAccepted;
+    notifyListeners();
+  }
+
+  void updateFormComplete(bool newFormComplete) {
+    _formComplete = newFormComplete;
     notifyListeners();
   }
 }

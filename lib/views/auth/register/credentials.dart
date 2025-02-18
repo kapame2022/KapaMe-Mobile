@@ -30,6 +30,14 @@ class _CredentialsState extends State<Credentials> {
     super.dispose();
   }
 
+  void checkFormCompletion() {
+    final newUser = Provider.of<UserState>(context, listen: false);
+    bool complete =
+        newUser.password.isNotEmpty && newUser.confirmPassword.isNotEmpty;
+
+    Provider.of<UserState>(context, listen: false).updateFormComplete(complete);
+  }
+
   @override
   Widget build(BuildContext context) {
     final newUser = Provider.of<UserState>(context, listen: false);
@@ -79,6 +87,7 @@ class _CredentialsState extends State<Credentials> {
           controller: passwordController,
           onChanged: (value) {
             newUser.updatePassword(value);
+            checkFormCompletion();
           },
           obscureText: obscureText,
           decoration: InputDecoration(
@@ -113,6 +122,7 @@ class _CredentialsState extends State<Credentials> {
           controller: confirmPasswordController,
           onChanged: (value) {
             newUser.updateConfirmPassword(value);
+            checkFormCompletion();
           },
           obscureText: obscureText2,
           decoration: InputDecoration(
