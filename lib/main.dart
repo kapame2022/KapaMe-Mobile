@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:kapame/services/new_user.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 //routes
 import 'package:kapame/views/auth/login.dart';
@@ -34,12 +35,16 @@ import 'package:provider/provider.dart';
 import 'views/home/landing.dart';
 
 void main() async {
-  // Initialize the necessary services
+  WidgetsFlutterBinding.ensureInitialized();
+
+  const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  String? savedToken = await secureStorage.read(key: 'token');
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserState()),
-        ChangeNotifierProvider(create: (context) => AuthUserState()),
+        ChangeNotifierProvider(create: (context) => AuthUserState(inToken: savedToken)),
       ],
       child: const MyApp(),
     ),

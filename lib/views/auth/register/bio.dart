@@ -20,8 +20,6 @@ class _BioState extends State<Bio> {
       lastDate: DateTime(2101),
     );
     if (picked != null && picked != selectedDate) {
-      // DateTime userDateOfBirth =
-      //     Provider.of<UserState>(context, listen: false).dateOfBirth;
       Provider.of<UserState>(context, listen: false).updateDateOfBirth(picked);
 
       setState(() {
@@ -68,8 +66,6 @@ class _BioState extends State<Bio> {
             hint: const Text('Select gender'),
             value: selectedGender,
             onChanged: (String? newValue) {
-              // String gender =
-              //     Provider.of<UserState>(context, listen: false).gender;
               Provider.of<UserState>(context, listen: false)
                   .updateGender(newValue ?? '');
             },

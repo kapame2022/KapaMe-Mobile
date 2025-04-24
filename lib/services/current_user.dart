@@ -16,6 +16,10 @@ class AuthUserState extends ChangeNotifier {
   AppUser? get appUser => _user;
   DateTime? get expireDate => _expireDate;
 
+  AuthUserState({String? inToken}) {
+    _token = inToken;
+  }
+
   Future<void>? updateAuthUser(
       {String? inMessage,
       bool? inIsSuccess,

@@ -5,6 +5,7 @@ import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/auth_response.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -23,6 +24,8 @@ class _LoginState extends State<Login> {
   bool isSuccess = false;
   bool isComplete = false;
   bool obscureText = true;
+
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   @override
   void dispose() {
@@ -65,6 +68,9 @@ class _LoginState extends State<Login> {
           AppUser.fromMap(res.data['user']),
           DateTime.parse(res.data['expireDate']),
         );
+
+        // Save token to secure storage
+        await secureStorage.write(key: 'token', value: currentUser.token);
 
         setState(() {
           isSuccess = true;
