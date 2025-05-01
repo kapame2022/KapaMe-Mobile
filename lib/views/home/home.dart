@@ -101,8 +101,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -126,8 +126,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -151,8 +151,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -176,8 +176,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -201,8 +201,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -226,8 +226,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -274,8 +274,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),
@@ -299,8 +299,8 @@ class _HomeState extends State<Home> {
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
-                              height: 100,
-                              width: 100,
+                              height: 110,
+                              width: 110,
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(10),

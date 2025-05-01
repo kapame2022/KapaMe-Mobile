@@ -1,0 +1,2 @@
+/home/athi/Documents/DEVELOPMENT/KapaMe-Mobile/android/app/.cxx/RelWithDebInfo/a4g704w2/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/athi/Documents/DEVELOPMENT/KapaMe-Mobile/android/app/.cxx/RelWithDebInfo/a4g704w2/armeabi-v7a/CMakeFiles/rebuild_cache.dir
