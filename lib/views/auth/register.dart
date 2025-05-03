@@ -56,23 +56,34 @@ class _RegisterState extends State<Register> {
   }
 
   Widget currentButton() {
+    final newUser = Provider.of<UserState>(context);
+    bool formComplete = newUser.fullName.isNotEmpty &&
+        newUser.email.isNotEmpty &&
+        newUser.phoneNumber.isNotEmpty &&
+        newUser.gender != 'Select gender' &&
+        newUser.password.isNotEmpty &&
+        newUser.confirmPassword.isNotEmpty &&
+        newUser.password == newUser.confirmPassword;
+        
+    Color buttonColor = formComplete 
+        ? Colors.green 
+        : const Color.fromARGB(255, 72, 72, 72);
+
     if (_currentStep <= 1) {
       return FilledButton(
         onPressed: goToNextStep,
-        style: const ButtonStyle(
-          shape: WidgetStatePropertyAll(
+        style: ButtonStyle(
+          shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
                 Radius.circular(10),
               ),
             ),
           ),
-          minimumSize: WidgetStatePropertyAll(
+          minimumSize: const WidgetStatePropertyAll(
             Size(double.infinity, 60),
           ),
-          backgroundColor: WidgetStatePropertyAll(
-            Color.fromARGB(255, 72, 72, 72),
-          ),
+          backgroundColor: WidgetStatePropertyAll(buttonColor),
         ),
         child: const Text("Continue"),
       );
@@ -92,9 +103,7 @@ class _RegisterState extends State<Register> {
           minimumSize: const WidgetStatePropertyAll(
             Size(double.infinity, 60),
           ),
-          backgroundColor: WidgetStatePropertyAll(
-            isComplete ? Colors.green : const Color.fromARGB(255, 72, 72, 72),
-          ),
+          backgroundColor: WidgetStatePropertyAll(buttonColor),
         ),
         child: isLoading
             ? const CircularProgressIndicator(

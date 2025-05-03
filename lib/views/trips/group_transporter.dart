@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/trip.dart';
+import 'package:kapame/widgets/custom_info_window.dart';
 import 'package:location/location.dart';
 
 class GroupTransporter extends StatefulWidget {
@@ -33,6 +34,9 @@ class _GroupTransporterState extends State<GroupTransporter> {
   String? pickUpLong;
   String? destLat;
   String? destLong;
+
+  bool _showCustomWindow = false;
+  Trip? _selectedTrip;
 
   @override
   void initState() {
@@ -164,18 +168,17 @@ class _GroupTransporterState extends State<GroupTransporter> {
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
             onTap: () {
-              Navigator.pushNamed(context, '/viewrequest',
-                  arguments: {"trip": trip});
+              // Update the UI state to display your custom info window overlay.
+              setState(() {
+                _showCustomWindow = true;
+                _selectedTrip = trip;
+              });
             },
             position: LatLng(
               double.parse(trip.tripLocationInfo!.pickUpLatitude!),
               double.parse(trip.tripLocationInfo!.pickUpLongitude!),
             ),
-            infoWindow: InfoWindow(
-                title: trip.tripLocationInfo?.destinationAddress.toString() ??
-                    'Unknown Location',
-                snippet:
-                    'Requester Contact Info: ${trip.contactDetailsPhoneNumber}'),
+            infoWindow: const InfoWindow(title: '', snippet: ''),
           ),
         );
       }
@@ -201,30 +204,22 @@ class _GroupTransporterState extends State<GroupTransporter> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: currentLocation == null
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
+                // Google Map container
                 Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 0,
-                    vertical: 25,
-                  ), // Margin around the map
-                  height: MediaQuery.of(context).size.height *
-                      0.85, // 80% of the screen height
+                  margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 25),
+                  height: MediaQuery.of(context).size.height * 0.85,
                   decoration: BoxDecoration(
-                    color: Colors.white, // Optional: Set a background color
-                    borderRadius: BorderRadius.circular(
-                      10,
-                    ), // Optional: Add rounded corners
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(currentLocation!.latitude!,
-                            currentLocation!.longitude!),
+                        target: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
                         zoom: 15,
                       ),
                       onMapCreated: (GoogleMapController controller) {
@@ -236,6 +231,23 @@ class _GroupTransporterState extends State<GroupTransporter> {
                     ),
                   ),
                 ),
+                // Your custom info window overlay
+                if (_showCustomWindow && _selectedTrip != null)
+                  Positioned(
+                    bottom: 100, // Adjust the position as needed
+                    left: 20,
+                    right: 20,
+                    child: CustomInfoWindow(
+                      title: _selectedTrip!.tripLocationInfo!.pickUpAddress ?? 'No address',
+                      snippet: 'More details about the trip',
+                      onClose: () {
+                        setState(() {
+                          _showCustomWindow = false;
+                        });
+                      },
+                    ),
+                  ),
+                // Other widget overlays (e.g. filter button)
                 Positioned(
                   bottom: 45,
                   left: 20,
