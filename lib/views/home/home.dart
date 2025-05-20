@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/app_user.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +13,50 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  static const String _productionBannerId =
+      'ca-app-pub-1273948640342808/8212647184';
+  static const String _testBannerId = 'ca-app-pub-3940256099942544/6300978111';
+
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
+  void _loadAd() {
+    final String adUnitId = kReleaseMode ? _productionBannerId : _testBannerId;
+
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('BannerAd failed to load: $error');
+          setState(() {
+            _isAdLoaded = false;
+          });
+          ad.dispose();
+        },
+      ),
+    );
+    _bannerAd?.load();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     AppUser? authUser = Provider.of<AuthUserState>(context).appUser;
@@ -325,6 +371,13 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+      bottomNavigationBar: _isAdLoaded && _bannerAd != null
+          ? Container(
+              height: _bannerAd?.size.height.toDouble() ?? 0,
+              alignment: Alignment.center,
+              child: AdWidget(ad: _bannerAd!),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

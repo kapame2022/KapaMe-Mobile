@@ -1,0 +1,1 @@
+/home/athi/Documents/DEV/KapaMe/KapaMe-Mobile/build/app/intermediates/cxx/RelWithDebInfo/5n1o6m1c/obj/armeabi-v7a

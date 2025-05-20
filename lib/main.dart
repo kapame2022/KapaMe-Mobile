@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:kapame/services/new_user.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 //routes
 import 'package:kapame/views/auth/login.dart';
@@ -36,6 +37,14 @@ import 'views/home/landing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize AdMob
+  await MobileAds.instance.initialize().then((InitializationStatus status) {
+    // Log initialization status for debugging
+    status.adapterStatuses.forEach((key, value) {
+      debugPrint('Adapter status for $key: ${value.description}');
+    });
+  });
 
   const FlutterSecureStorage secureStorage = FlutterSecureStorage();
   String? savedToken = await secureStorage.read(key: 'token');
@@ -44,7 +53,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserState()),
-        ChangeNotifierProvider(create: (context) => AuthUserState(inToken: savedToken)),
+        ChangeNotifierProvider(
+            create: (context) => AuthUserState(inToken: savedToken)),
       ],
       child: const MyApp(),
     ),
@@ -57,7 +67,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'KapaMe Mobile',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade300),
