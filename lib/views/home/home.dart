@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/app_user.dart';
+import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:provider/provider.dart';
 
@@ -13,18 +14,12 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  static const String _productionBannerId =
-      'ca-app-pub-1273948640342808/8212647184';
-  static const String _testBannerId = 'ca-app-pub-3940256099942544/6300978111';
-
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
 
   void _loadAd() {
-    final String adUnitId = kReleaseMode ? _productionBannerId : _testBannerId;
-
     _bannerAd = BannerAd(
-      adUnitId: adUnitId,
+      adUnitId: AdUnitIds.homeBannerAd,
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(

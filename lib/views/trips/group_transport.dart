@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/trip.dart';
+import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
@@ -48,6 +50,32 @@ class _GroupTransportState extends State<GroupTransport> {
   DateTime? tripDateTime;
   final TextEditingController _dateController = TextEditingController();
 
+  BannerAd? _bannerAd;
+  bool isAdLoaded = false;
+
+  void loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdUnitIds.groupTransportAd,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('BannerAd failed to load: $error');
+          setState(() {
+            isAdLoaded = false;
+          });
+          ad.dispose();
+        },
+      ),
+    );
+    _bannerAd?.load();
+  }
+
   Future<void> selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -71,6 +99,7 @@ class _GroupTransportState extends State<GroupTransport> {
     emailController.dispose();
     numberOfPeopleController.dispose();
     tripPriorityController.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -78,7 +107,7 @@ class _GroupTransportState extends State<GroupTransport> {
   void initState() {
     super.initState();
     _getLocation();
-    MobileAds.instance.initialize();
+    loadAd();
     pickUpController.text = 'Pick Up';
     destinationController.text = 'Destination';
   }
@@ -528,6 +557,19 @@ class _GroupTransportState extends State<GroupTransport> {
                 ),
               ],
             ),
+      bottomNavigationBar: isAdLoaded && _bannerAd != null
+          ? SafeArea(
+              child: Container(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                alignment: Alignment.center,
+                margin: const EdgeInsets.only(
+                  bottom: 10,
+                ),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

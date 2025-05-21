@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/trip.dart';
+import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/widgets/custom_info_window.dart';
 import 'package:location/location.dart';
 
@@ -38,12 +39,38 @@ class _GroupTransporterState extends State<GroupTransporter> {
   bool _showCustomWindow = false;
   Trip? _selectedTrip;
 
+  BannerAd? _bannerAd;
+  bool isAdLoaded = false;
+
+  void loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdUnitIds.groupTransporterAd,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('BannerAd failed to load: $error');
+          setState(() {
+            isAdLoaded = false;
+          });
+          ad.dispose();
+        },
+      ),
+    );
+    _bannerAd?.load();
+  }
+
   @override
   void initState() {
     super.initState();
     _getLocation();
     _getTrips();
-    MobileAds.instance.initialize();
+    loadAd();
     pickUpController.text = 'Pick Up';
     destinationController.text = 'Destination';
   }
@@ -53,6 +80,7 @@ class _GroupTransporterState extends State<GroupTransporter> {
     pickUpController.dispose();
     destinationController.dispose();
     numberOfPeopleController.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -209,7 +237,8 @@ class _GroupTransporterState extends State<GroupTransporter> {
               children: [
                 // Google Map container
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 25),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 25),
                   height: MediaQuery.of(context).size.height * 0.85,
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -219,7 +248,8 @@ class _GroupTransporterState extends State<GroupTransporter> {
                     borderRadius: BorderRadius.circular(10),
                     child: GoogleMap(
                       initialCameraPosition: CameraPosition(
-                        target: LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
+                        target: LatLng(currentLocation!.latitude!,
+                            currentLocation!.longitude!),
                         zoom: 15,
                       ),
                       onMapCreated: (GoogleMapController controller) {
@@ -238,7 +268,8 @@ class _GroupTransporterState extends State<GroupTransporter> {
                     left: 20,
                     right: 20,
                     child: CustomInfoWindow(
-                      title: _selectedTrip!.tripLocationInfo!.pickUpAddress ?? 'No address',
+                      title: _selectedTrip!.tripLocationInfo!.pickUpAddress ??
+                          'No address',
                       snippet: 'More details about the trip',
                       onClose: () {
                         setState(() {
@@ -445,6 +476,19 @@ class _GroupTransporterState extends State<GroupTransporter> {
                 )
               ],
             ),
+      bottomNavigationBar: isAdLoaded && _bannerAd != null
+          ? SafeArea(
+              child: Container(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                alignment: Alignment.center,
+                margin: const EdgeInsets.only(
+                  bottom: 10,
+                ),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
