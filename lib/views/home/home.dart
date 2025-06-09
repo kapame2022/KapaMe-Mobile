@@ -16,6 +16,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+  final ScrollController scrollController = ScrollController();
 
   void _loadAd() {
     _bannerAd = BannerAd(
@@ -40,6 +41,16 @@ class _HomeState extends State<Home> {
     _bannerAd?.load();
   }
 
+  void scrollToBottom() {
+    if (scrollController.hasClients) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +59,7 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
+    scrollController.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -366,11 +378,25 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: scrollToBottom,
+        child: const Icon(
+          Icons.arrow_downward_rounded,
+        ),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
       bottomNavigationBar: _isAdLoaded && _bannerAd != null
-          ? Container(
-              height: _bannerAd?.size.height.toDouble() ?? 0,
-              alignment: Alignment.center,
-              child: AdWidget(ad: _bannerAd!),
+          ? SafeArea(
+              child: Container(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                alignment: Alignment.center,
+                margin: const EdgeInsets.only(
+                  bottom: 10,
+                ),
+                child: AdWidget(ad: _bannerAd!),
+              ),
             )
           : const SizedBox.shrink(),
     );
