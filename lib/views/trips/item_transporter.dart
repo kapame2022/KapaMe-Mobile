@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/ad_unit_ids.dart';
+import 'package:kapame/widgets/custom_info_window.dart';
 import 'package:location/location.dart';
 
 class ItemTransporter extends StatefulWidget {
@@ -172,6 +173,9 @@ class _ItemTransporterState extends State<ItemTransporter> {
     }).toList();
   }
 
+  bool _showCustomWindow = false;
+  Trip? _selectedTrip;
+
   void _createMarkers(List<Trip> trips) {
     setState(() {
       markers.clear();
@@ -179,15 +183,17 @@ class _ItemTransporterState extends State<ItemTransporter> {
         markers.add(
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
+            onTap: () {
+              setState(() {
+                _showCustomWindow = true;
+                _selectedTrip = trip;
+              });
+            },
             position: LatLng(
               double.parse(trip.tripLocationInfo!.pickUpLatitude!),
               double.parse(trip.tripLocationInfo!.pickUpLongitude!),
             ),
-            infoWindow: InfoWindow(
-                title: trip.tripLocationInfo?.destinationAddress.toString() ??
-                    'Unknown Location',
-                snippet:
-                    'Requester Contact Info: ${trip.contactDetailsPhoneNumber}'),
+            infoWindow: const InfoWindow(title: '', snippet: ''),
           ),
         );
       }
@@ -246,6 +252,28 @@ class _ItemTransporterState extends State<ItemTransporter> {
                     ),
                   ),
                 ),
+                if (_showCustomWindow && _selectedTrip != null)
+                  Positioned(
+                    bottom: 100, // Adjust as needed
+                    left: 20,
+                    right: 20,
+                    child: CustomInfoWindow(
+                      title:
+                          "Pickup Address: \\${_selectedTrip!.tripLocationInfo!.pickUpAddress != null ? _selectedTrip!.tripLocationInfo!.pickUpAddress : 'No address'}",
+                      snippet:
+                          "Destination Address: \\${_selectedTrip!.tripLocationInfo!.destinationAddress != null ? _selectedTrip!.tripLocationInfo!.destinationAddress : 'No address'}",
+                      onClick: () => Navigator.pushNamed(
+                        context,
+                        '/viewrequest',
+                        arguments: _selectedTrip,
+                      ),
+                      onClose: () {
+                        setState(() {
+                          _showCustomWindow = false;
+                        });
+                      },
+                    ),
+                  ),
                 Positioned(
                   bottom: 45,
                   left: 20,

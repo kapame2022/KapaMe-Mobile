@@ -1,14 +1,18 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 class CustomInfoWindow extends StatelessWidget {
   final String title;
   final String snippet;
+  final VoidCallback onClick;
   final VoidCallback onClose;
 
   const CustomInfoWindow({
     Key? key,
     required this.title,
     required this.snippet,
+    required this.onClick,
     required this.onClose,
   }) : super(key: key);
 
@@ -37,15 +41,24 @@ class CustomInfoWindow extends StatelessWidget {
               style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: onClose,
-                child: const Text(
-                  "Close",
-                  style: TextStyle(color: Colors.blue),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: onClose,
+                  child: const Text(
+                    "Close",
+                    style: TextStyle(color: Colors.orange),
+                  ),
                 ),
-              ),
+                TextButton(
+                  onPressed: onClick,
+                  child: const Text(
+                    "More Details",
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

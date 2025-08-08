@@ -268,9 +268,17 @@ class _GroupTransporterState extends State<GroupTransporter> {
                     left: 20,
                     right: 20,
                     child: CustomInfoWindow(
-                      title: _selectedTrip!.tripLocationInfo!.pickUpAddress ??
-                          'No address',
-                      snippet: 'More details about the trip',
+                      title:
+                          "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress}" ??
+                              'No address',
+                      snippet:
+                          "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress}" ??
+                              'No address',
+                      onClick: () => Navigator.pushNamed(
+                        context,
+                        '/viewrequest',
+                        arguments: _selectedTrip,
+                      ),
                       onClose: () {
                         setState(() {
                           _showCustomWindow = false;

@@ -4,7 +4,9 @@ import 'package:kapame/models/trip.dart';
 class TripServices {
   Future<List<dynamic>>? suggestions;
   Dio dio = Dio();
-  final String apiKey = 'AIzaSyD6VLyBCAZHp-hi2QssKeRRZDlmvweZHT0';
+  final String apiKey = 'AIzaSyB_oEV-wBOY2BZhHtZhrRbE_JDC-4eAYOc';
+
+  final String directionsApiKey = 'AIzaSyB_oEV-wBOY2BZhHtZhrRbE_JDC-4eAYOc';
 
   Future<List<dynamic>> getSuggestions(String input) async {
     if (input.isEmpty) {
