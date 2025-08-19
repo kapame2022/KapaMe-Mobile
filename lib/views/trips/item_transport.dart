@@ -28,7 +28,11 @@ class _ItemTransportState extends State<ItemTransport> {
   TextEditingController emailController = TextEditingController();
   TextEditingController tripPriorityController = TextEditingController();
   String? selectedPriority;
-  final List<String> priorityItems = ['Low', 'Important', 'Urgent'];
+  final List<String> priorityItems = [
+    'Low (Removed after 4 hours)',
+    'Important (Removed after 2 hours)',
+    'Urgent (Removed after 1 hour)'
+  ];
   TextEditingController tripScheduleController = TextEditingController();
   String? selectedSchedule;
   final List<String> scheduleItems = [
