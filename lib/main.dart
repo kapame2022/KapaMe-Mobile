@@ -37,7 +37,7 @@ import 'views/home/landing.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize AdMob
   await MobileAds.instance.initialize().then((InitializationStatus status) {
     // Log initialization status for debugging

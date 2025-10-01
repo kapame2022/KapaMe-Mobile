@@ -185,16 +185,10 @@ class _PublicDriverState extends State<PublicDriver> {
           : Stack(
               children: [
                 Container(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 0, vertical: 25), // Margin around the map
+                  margin:
+                      const EdgeInsets.only(top: 24), // Margin around the map
                   height: MediaQuery.of(context).size.height *
-                      0.85, // 80% of the screen height
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Optional: Set a background color
-                    borderRadius: BorderRadius.circular(
-                      10,
-                    ), // Optional: Add rounded corners
-                  ),
+                      0.95, // 80% of the screen height
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: GoogleMap(
@@ -219,9 +213,9 @@ class _PublicDriverState extends State<PublicDriver> {
                     right: 20,
                     child: CustomInfoWindow(
                       title:
-                          "Pickup Address: \\${_selectedTrip!.tripLocationInfo!.pickUpAddress != null ? _selectedTrip!.tripLocationInfo!.pickUpAddress : 'No address'}",
+                          "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress != null ? _selectedTrip!.tripLocationInfo!.pickUpAddress : 'No address'}",
                       snippet:
-                          "Destination Address: \\${_selectedTrip!.tripLocationInfo!.destinationAddress != null ? _selectedTrip!.tripLocationInfo!.destinationAddress : 'No address'}",
+                          "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress != null ? _selectedTrip!.tripLocationInfo!.destinationAddress : 'No address'}",
                       onClick: () => Navigator.pushNamed(
                         context,
                         '/viewrequest',

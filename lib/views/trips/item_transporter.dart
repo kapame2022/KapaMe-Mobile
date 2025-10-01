@@ -225,16 +225,10 @@ class _ItemTransporterState extends State<ItemTransporter> {
           : Stack(
               children: [
                 Container(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 0, vertical: 25), // Margin around the map
+                  margin:
+                      const EdgeInsets.only(top: 24), // Margin around the map
                   height: MediaQuery.of(context).size.height *
-                      0.85, // 80% of the screen height
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Optional: Set a background color
-                    borderRadius: BorderRadius.circular(
-                      10,
-                    ), // Optional: Add rounded corners
-                  ),
+                      0.95, // 80% of the screen height
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: GoogleMap(

@@ -237,13 +237,8 @@ class _GroupTransporterState extends State<GroupTransporter> {
               children: [
                 // Google Map container
                 Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 0, vertical: 25),
-                  height: MediaQuery.of(context).size.height * 0.85,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  margin: const EdgeInsets.only(top: 24),
+                  height: MediaQuery.of(context).size.height * 0.95,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: GoogleMap(

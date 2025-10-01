@@ -243,16 +243,9 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
               children: [
                 // Container with Google Map
                 Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 0,
-                    vertical: 25,
-                  ),
+                  margin: const EdgeInsets.only(top: 24),
                   height: MediaQuery.of(context).size.height *
-                      0.85, // Limits the map height to 80% of the screen height
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(10), // Adds rounded corners
-                  ),
+                      0.95, // Limits the map height to 80% of the screen height
                   child: GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: LatLng(currentLocation!.latitude!,
