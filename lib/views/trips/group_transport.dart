@@ -10,6 +10,7 @@ import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class GroupTransport extends StatefulWidget {
   const GroupTransport({super.key});
@@ -81,18 +82,24 @@ class _GroupTransportState extends State<GroupTransport> {
   }
 
   Future<void> selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final DateTime? date = await showDatePicker(
       context: context,
-      initialDate: tripDateTime ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime(2100),
     );
-    if (picked != null && picked != tripDateTime) {
-      setState(() {
-        tripDateTime = picked;
-        _dateController.text = "${picked.toLocal()}".split(' ')[0];
-      });
-    }
+    if (date == null) return;
+
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (time == null) return;
+
+    final DateTime dateTime =
+        DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    // Assuming you have a TextEditingController named _controller
+    _dateController.text = DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
   }
 
   @override
@@ -261,7 +268,7 @@ class _GroupTransportState extends State<GroupTransport> {
                 ),
                 // Positioning the button at the bottom left
                 Positioned(
-                  bottom: 45, // Adjust the distance from the bottom
+                  bottom: 20, // Adjust the distance from the bottom
                   left: 20, // Adjust the distance from the left
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -273,7 +280,9 @@ class _GroupTransportState extends State<GroupTransport> {
                           return SingleChildScrollView(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 40, horizontal: 25),
+                                vertical: 40,
+                                horizontal: 25,
+                              ),
                               child: Column(children: [
                                 const Text(
                                   'Group Transporter Request',
@@ -309,6 +318,12 @@ class _GroupTransportState extends State<GroupTransport> {
                                           }
                                         },
                                         style: const ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                              vertical: 10,
+                                              horizontal: 15,
+                                            ),
+                                          ),
                                           foregroundColor:
                                               WidgetStatePropertyAll(
                                             Color.fromARGB(255, 82, 82, 82),
@@ -326,7 +341,12 @@ class _GroupTransportState extends State<GroupTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child: Text(pickUpController.text),
+                                          child: Text(
+                                            pickUpController.text,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 10),
@@ -350,6 +370,12 @@ class _GroupTransportState extends State<GroupTransport> {
                                           }
                                         },
                                         style: const ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                              vertical: 10,
+                                              horizontal: 15,
+                                            ),
+                                          ),
                                           foregroundColor:
                                               WidgetStatePropertyAll(
                                             Color.fromARGB(255, 82, 82, 82),
@@ -367,8 +393,12 @@ class _GroupTransportState extends State<GroupTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child:
-                                              Text(destinationController.text),
+                                          child: Text(
+                                            destinationController.text,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 10),

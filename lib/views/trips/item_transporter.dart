@@ -269,7 +269,7 @@ class _ItemTransporterState extends State<ItemTransporter> {
                     ),
                   ),
                 Positioned(
-                  bottom: 45,
+                  bottom: 20,
                   left: 20,
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -281,7 +281,9 @@ class _ItemTransporterState extends State<ItemTransporter> {
                           return SingleChildScrollView(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 40, horizontal: 25),
+                                vertical: 40,
+                                horizontal: 25,
+                              ),
                               child: Column(
                                 children: [
                                   const Text(
@@ -316,6 +318,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                vertical: 10,
+                                                horizontal: 15,
+                                              ),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -333,7 +341,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(pickUpController.text),
+                                            child: Text(
+                                              pickUpController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),
@@ -357,6 +370,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                vertical: 10,
+                                                horizontal: 15,
+                                              ),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -376,6 +395,9 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                             alignment: Alignment.centerLeft,
                                             child: Text(
                                               destinationController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
                                             ),
                                           ),
                                         ),

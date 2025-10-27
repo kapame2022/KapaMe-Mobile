@@ -207,8 +207,9 @@ class _ItemTransportState extends State<ItemTransport> {
           : Stack(
               children: [
                 Container(
-                  margin:
-                      const EdgeInsets.only(top: 24), // Margin around the map
+                  margin: const EdgeInsets.only(
+                    top: 24,
+                  ), // Margin around the map
                   height: MediaQuery.of(context).size.height *
                       0.95, // 80% of the screen height
                   child: GoogleMap(
@@ -226,7 +227,7 @@ class _ItemTransportState extends State<ItemTransport> {
                 ),
                 // Positioning the button at the bottom left
                 Positioned(
-                  bottom: 45, // Adjust the distance from the bottom
+                  bottom: 20, // Adjust the distance from the bottom
                   left: 20, // Adjust the distance from the left
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -238,7 +239,9 @@ class _ItemTransportState extends State<ItemTransport> {
                           return SingleChildScrollView(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 40, horizontal: 25),
+                                vertical: 40,
+                                horizontal: 25,
+                              ),
                               child: Column(children: [
                                 const Text(
                                   'Item Transporter Request',
@@ -274,6 +277,12 @@ class _ItemTransportState extends State<ItemTransport> {
                                           }
                                         },
                                         style: const ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                              vertical: 10,
+                                              horizontal: 15,
+                                            ),
+                                          ),
                                           foregroundColor:
                                               WidgetStatePropertyAll(
                                             Color.fromARGB(255, 82, 82, 82),
@@ -291,7 +300,12 @@ class _ItemTransportState extends State<ItemTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child: Text(pickUpController.text),
+                                          child: Text(
+                                            pickUpController.text,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 10),
@@ -315,6 +329,12 @@ class _ItemTransportState extends State<ItemTransport> {
                                           }
                                         },
                                         style: const ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                              vertical: 10,
+                                              horizontal: 15,
+                                            ),
+                                          ),
                                           foregroundColor:
                                               WidgetStatePropertyAll(
                                             Color.fromARGB(255, 82, 82, 82),
@@ -332,8 +352,12 @@ class _ItemTransportState extends State<ItemTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child:
-                                              Text(destinationController.text),
+                                          child: Text(
+                                            destinationController.text,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(height: 10),

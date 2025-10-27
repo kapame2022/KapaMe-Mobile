@@ -261,7 +261,7 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                 ),
                 // Positioned button at the bottom left
                 Positioned(
-                  bottom: 45, // Adjust the distance from the bottom
+                  bottom: 20, // Adjust the distance from the bottom
                   left: 20, // Adjust the distance from the left
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -311,6 +311,12 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                vertical: 10,
+                                                horizontal: 15,
+                                              ),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -328,7 +334,12 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(pickUpController.text),
+                                            child: Text(
+                                              pickUpController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),
@@ -352,6 +363,10 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                  vertical: 10, horizontal: 15),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -370,7 +385,11 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                                           child: Align(
                                             alignment: Alignment.centerLeft,
                                             child: Text(
-                                                destinationController.text),
+                                              destinationController.text,
+                                              style: const TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),
@@ -378,17 +397,20 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                                         TextFormField(
                                           controller: numberOfPeopleController,
                                           decoration: const InputDecoration(
-                                              hintText: 'Number of People',
-                                              border: OutlineInputBorder(
-                                                  borderSide:
-                                                      BorderSide(width: 1),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(10))),
-                                              focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: Colors.lightBlue,
-                                                      width: 1))),
+                                            hintText: 'Number of People',
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide(width: 1),
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(10),
+                                              ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.lightBlue,
+                                                width: 1,
+                                              ),
+                                            ),
+                                          ),
                                           validator: (String? value) {
                                             if (value == null ||
                                                 value.isEmpty) {
@@ -403,17 +425,20 @@ class _PrivateCommuterState extends State<PrivateCommuter> {
                                           controller: phoneNumberController,
                                           obscureText: false,
                                           decoration: const InputDecoration(
-                                              hintText: 'Phone Number',
-                                              border: OutlineInputBorder(
-                                                  borderSide:
-                                                      BorderSide(width: 1),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(10))),
-                                              focusedBorder: OutlineInputBorder(
-                                                  borderSide: BorderSide(
-                                                      color: Colors.lightBlue,
-                                                      width: 1))),
+                                            hintText: 'Phone Number',
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide(width: 1),
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(10),
+                                              ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: Colors.lightBlue,
+                                                width: 1,
+                                              ),
+                                            ),
+                                          ),
                                           validator: (String? value) {
                                             if (value == null ||
                                                 value.isEmpty) {

@@ -179,8 +179,9 @@ class _PublicCommuterState extends State<PublicCommuter> {
           : Stack(
               children: [
                 Container(
-                  margin:
-                      const EdgeInsets.only(top: 24), // Margin around the map
+                  margin: const EdgeInsets.only(
+                    top: 24,
+                  ), // Margin around the map
                   height: MediaQuery.of(context).size.height *
                       0.95, // 80% of the screen height
                   child: ClipRRect(
@@ -202,7 +203,7 @@ class _PublicCommuterState extends State<PublicCommuter> {
                   ),
                 ),
                 Positioned(
-                  bottom: 45,
+                  bottom: 20,
                   left: 20,
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -214,7 +215,9 @@ class _PublicCommuterState extends State<PublicCommuter> {
                           return SingleChildScrollView(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 40, horizontal: 25),
+                                vertical: 40,
+                                horizontal: 25,
+                              ),
                               child: Column(
                                 children: [
                                   const Text(
@@ -252,6 +255,12 @@ class _PublicCommuterState extends State<PublicCommuter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                vertical: 10,
+                                                horizontal: 15,
+                                              ),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -259,16 +268,22 @@ class _PublicCommuterState extends State<PublicCommuter> {
                                             shape: WidgetStatePropertyAll(
                                               RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
+                                                  Radius.circular(10),
+                                                ),
                                               ),
                                             ),
                                             minimumSize: WidgetStatePropertyAll(
-                                                Size(double.infinity, 60)),
+                                              Size(double.infinity, 60),
+                                            ),
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
                                             child: Text(
-                                                destinationController.text),
+                                              destinationController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 40),
@@ -278,15 +293,17 @@ class _PublicCommuterState extends State<PublicCommuter> {
                                             shape: WidgetStatePropertyAll(
                                               RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
+                                                  Radius.circular(10),
+                                                ),
                                               ),
                                             ),
                                             minimumSize: WidgetStatePropertyAll(
-                                                Size(double.infinity, 60)),
+                                              Size(double.infinity, 60),
+                                            ),
                                             backgroundColor:
                                                 WidgetStatePropertyAll(
-                                                    Color.fromARGB(
-                                                        255, 241, 144, 47)),
+                                              Color.fromARGB(255, 241, 144, 47),
+                                            ),
                                           ),
                                           child: isLoading
                                               ? const CircularProgressIndicator(

@@ -283,7 +283,7 @@ class _GroupTransporterState extends State<GroupTransporter> {
                   ),
                 // Other widget overlays (e.g. filter button)
                 Positioned(
-                  bottom: 45,
+                  bottom: 20,
                   left: 20,
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -295,7 +295,9 @@ class _GroupTransporterState extends State<GroupTransporter> {
                           return SingleChildScrollView(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  vertical: 40, horizontal: 25),
+                                vertical: 40,
+                                horizontal: 25,
+                              ),
                               child: Column(
                                 children: [
                                   const Text(
@@ -330,6 +332,12 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                vertical: 10,
+                                                horizontal: 15,
+                                              ),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -347,7 +355,12 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(pickUpController.text),
+                                            child: Text(
+                                              pickUpController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),
@@ -371,6 +384,12 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                             }
                                           },
                                           style: const ButtonStyle(
+                                            padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                vertical: 10,
+                                                horizontal: 15,
+                                              ),
+                                            ),
                                             foregroundColor:
                                                 WidgetStatePropertyAll(
                                               Color.fromARGB(255, 82, 82, 82),
@@ -389,7 +408,11 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                           child: Align(
                                             alignment: Alignment.centerLeft,
                                             child: Text(
-                                                destinationController.text),
+                                              destinationController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),

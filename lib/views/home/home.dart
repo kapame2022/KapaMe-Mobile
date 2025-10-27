@@ -69,6 +69,7 @@ class _HomeState extends State<Home> {
     AppUser? authUser = Provider.of<AuthUserState>(context).appUser;
     return Scaffold(
       body: SingleChildScrollView(
+        controller: scrollController, // <-- attach controller here
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
           child: Column(

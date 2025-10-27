@@ -217,7 +217,7 @@ class _PrivateDriverState extends State<PrivateDriver> {
                   ),
                 ),
                 Positioned(
-                  bottom: 45,
+                  bottom: 20,
                   left: 20,
                   child: FloatingActionButton(
                     backgroundColor: Colors.blue[200],
@@ -281,7 +281,12 @@ class _PrivateDriverState extends State<PrivateDriver> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(pickUpController.text),
+                                            child: Text(
+                                              pickUpController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 10),
@@ -323,7 +328,11 @@ class _PrivateDriverState extends State<PrivateDriver> {
                                           child: Align(
                                             alignment: Alignment.centerLeft,
                                             child: Text(
-                                                destinationController.text),
+                                              destinationController.text,
+                                              style: TextStyle(
+                                                fontSize: 17,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 40),
