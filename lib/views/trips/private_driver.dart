@@ -1,3 +1,4 @@
+import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -177,10 +178,12 @@ class _PrivateDriverState extends State<PrivateDriver> {
               double.parse(trip.tripLocationInfo!.pickUpLongitude!),
             ),
             infoWindow: InfoWindow(
-                title: trip.tripLocationInfo?.destinationAddress.toString() ??
-                    'Unknown Location',
-                snippet:
-                    'Requester Contact Info: ${trip.contactDetailsPhoneNumber}'),
+              title: trip.tripLocationInfo?.destinationAddress.toString() ??
+                  'Unknown Location',
+              snippet:
+                  'Requester Contact Info: ${trip.contactDetailsPhoneNumber}',
+              onTap: () => Navigator.pushNamed(context, '/chat', arguments: trip),
+            ),
           ),
         );
       }
@@ -281,8 +284,8 @@ class _PrivateDriverState extends State<PrivateDriver> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              pickUpController.text,
+                                            child: LocationAddressText(
+                                              controller: pickUpController,
                                               style: TextStyle(
                                                 fontSize: 17,
                                               ),
@@ -327,8 +330,8 @@ class _PrivateDriverState extends State<PrivateDriver> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              destinationController.text,
+                                            child: LocationAddressText(
+                                              controller: destinationController,
                                               style: TextStyle(
                                                 fontSize: 17,
                                               ),

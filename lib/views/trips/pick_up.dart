@@ -43,7 +43,6 @@ class _PickUpState extends State<PickUp> {
                 setState(() {
                   suggestions = tripServices.getSuggestions(value);
                 });
-                print(suggestions!.asStream().length);
               },
             ),
             const SizedBox(height: 20),

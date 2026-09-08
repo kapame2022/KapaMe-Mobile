@@ -1,3 +1,4 @@
+import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -278,8 +279,8 @@ class _PublicCommuterState extends State<PublicCommuter> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              destinationController.text,
+                                            child: LocationAddressText(
+                                              controller: destinationController,
                                               style: TextStyle(
                                                 fontSize: 17,
                                               ),

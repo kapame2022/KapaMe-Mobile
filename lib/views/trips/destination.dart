@@ -43,7 +43,6 @@ class _DestinationState extends State<Destination> {
                 setState(() {
                   suggestions = tripServices.getSuggestions(value);
                 });
-                print(suggestions!.asStream().length);
               },
             ),
             const SizedBox(height: 20),

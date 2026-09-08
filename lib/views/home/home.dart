@@ -95,9 +95,15 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.inbox),
+                      icon: const Icon(Icons.history),
                       onPressed: () {
                         Navigator.pushNamed(context, '/triphistory');
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.inbox),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/messages');
                       },
                     ),
                     IconButton(

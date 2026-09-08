@@ -1,3 +1,4 @@
+import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -302,8 +303,8 @@ class _PublicDriverState extends State<PublicDriver> {
                                           ),
                                           child: Align(
                                             alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              destinationController.text,
+                                            child: LocationAddressText(
+                                              controller: destinationController,
                                               style: TextStyle(
                                                 fontSize: 17,
                                               ),

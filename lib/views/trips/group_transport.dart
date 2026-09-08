@@ -1,3 +1,4 @@
+import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -341,8 +342,8 @@ class _GroupTransportState extends State<GroupTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            pickUpController.text,
+                                          child: LocationAddressText(
+                                            controller: pickUpController,
                                             style: TextStyle(
                                               fontSize: 17,
                                             ),
@@ -393,8 +394,8 @@ class _GroupTransportState extends State<GroupTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            destinationController.text,
+                                          child: LocationAddressText(
+                                            controller: destinationController,
                                             style: TextStyle(
                                               fontSize: 17,
                                             ),

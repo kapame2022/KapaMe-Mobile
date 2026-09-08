@@ -1,3 +1,4 @@
+import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -300,8 +301,8 @@ class _ItemTransportState extends State<ItemTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            pickUpController.text,
+                                          child: LocationAddressText(
+                                            controller: pickUpController,
                                             style: TextStyle(
                                               fontSize: 17,
                                             ),
@@ -352,8 +353,8 @@ class _ItemTransportState extends State<ItemTransport> {
                                         ),
                                         child: Align(
                                           alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            destinationController.text,
+                                          child: LocationAddressText(
+                                            controller: destinationController,
                                             style: TextStyle(
                                               fontSize: 17,
                                             ),

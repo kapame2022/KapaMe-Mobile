@@ -2,6 +2,8 @@ class Trip {
   String? tripId;
   String? requester;
   String? transporter;
+  String? requesterName;
+  String? transporterName;
   String? tripType;
   String? tripStatus;
   TripLocationInfo? tripLocationInfo;
@@ -18,6 +20,8 @@ class Trip {
     this.tripId,
     this.requester,
     this.transporter,
+    this.requesterName,
+    this.transporterName,
     this.tripType,
     this.tripStatus,
     this.tripLocationInfo,
@@ -36,6 +40,8 @@ class Trip {
       tripId: map['tripId']?.toString() ?? '',
       requester: map['requester'],
       transporter: map['transporter'],
+      requesterName: map['requesterName']?.toString(),
+      transporterName: map['transporterName']?.toString(),
       tripType: map['tripType'],
       tripStatus: map['tripStatus'],
       tripLocationInfo: TripLocationInfo.fromMap(map['tripLocationInfo']),
@@ -43,8 +49,9 @@ class Trip {
       contactDetailsEmail: map['contactDetailsEmail'],
       tripPriority: map['tripPriority'],
       tripScheduling: map['tripScheduling'],
-      tripLastingTime: DateTime.parse(map['tripLastingTime']),
-      tripDateTime: DateTime.parse(map['tripDateTime']),
+      tripLastingTime:
+          DateTime.tryParse(map['tripLastingTime']?.toString() ?? ''),
+      tripDateTime: DateTime.tryParse(map['tripDateTime']?.toString() ?? ''),
       groupTransport: GroupTransportDetails.fromMap(map['groupTransport']),
       itemTransport: ItemTransportDetails.fromMap(map['itemTransport']),
     );
@@ -95,13 +102,13 @@ class TripLocationInfo {
       this.destinationLatitude,
       this.destinationLongitude});
 
-  factory TripLocationInfo.fromMap(Map<String, dynamic> map) {
+  factory TripLocationInfo.fromMap(Map<String, dynamic>? map) {
     return TripLocationInfo(
-        pickUpAddress: map['pickUpAddress'],
-        pickUpLatitude: map['pickUpLatitude'],
-        pickUpLongitude: map['pickUpLongitude'],
-        destinationAddress: map['destinationAddress'],
-        destinationLatitude: map['destinationLatitude'],
-        destinationLongitude: map['destinationLongitude']);
+        pickUpAddress: map?['pickUpAddress'],
+        pickUpLatitude: map?['pickUpLatitude'],
+        pickUpLongitude: map?['pickUpLongitude'],
+        destinationAddress: map?['destinationAddress'],
+        destinationLatitude: map?['destinationLatitude'],
+        destinationLongitude: map?['destinationLongitude']);
   }
 }
