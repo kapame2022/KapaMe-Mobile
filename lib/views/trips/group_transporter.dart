@@ -1,3 +1,7 @@
+import 'package:kapame/services/current_user.dart';
+import 'package:kapame/services/trip_request_filter.dart';
+import 'package:provider/provider.dart';
+import 'package:kapame/widgets/trip_date_time_picker.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +85,7 @@ class _GroupTransporterState extends State<GroupTransporter> {
     pickUpController.dispose();
     destinationController.dispose();
     numberOfPeopleController.dispose();
+    _dateController.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -123,8 +128,12 @@ class _GroupTransporterState extends State<GroupTransporter> {
       if (res.statusCode == 200) {
         final List<dynamic> tripsJson = res.data;
         final trips = tripsJson.map((json) => Trip.fromMap(json)).toList();
-        allTrips =
-            trips.where((trip) => trip.tripType == 'Group Transport').toList();
+        if (!mounted) return;
+        allTrips = filterTripRequests(
+          trips,
+          tripType: 'Group Transport',
+          auth: context.read<AuthUserState>(),
+        );
 
         _createMarkers(allTrips);
       } else {
@@ -189,6 +198,16 @@ class _GroupTransporterState extends State<GroupTransporter> {
     }).toList();
   }
 
+  double _getTripPriority(String? tripPriority) {
+    if (tripPriority == "Low") {
+      return BitmapDescriptor.hueGreen;
+    } else if (tripPriority == "Important") {
+      return BitmapDescriptor.hueOrange;
+    } else {
+      return BitmapDescriptor.hueRed;
+    }
+  }
+
   void _createMarkers(List<Trip> trips) {
     setState(() {
       markers.clear();
@@ -196,6 +215,9 @@ class _GroupTransporterState extends State<GroupTransporter> {
         markers.add(
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              _getTripPriority(trip.tripPriority),
+            ),
             onTap: () {
               // Update the UI state to display your custom info window overlay.
               setState(() {
@@ -215,18 +237,16 @@ class _GroupTransporterState extends State<GroupTransporter> {
   }
 
   Future<void> selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showTripDateTimePicker(
       context: context,
-      initialDate: tripDateTime ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDateTime: tripDateTime,
     );
-    if (picked != null && picked != tripDateTime) {
-      setState(() {
-        tripDateTime = picked;
-        _dateController.text = "${picked.toLocal()}".split(' ')[0];
-      });
-    }
+    if (picked == null || !mounted || !context.mounted) return;
+
+    setState(() {
+      tripDateTime = picked;
+      _dateController.text = formatTripDateTime(picked);
+    });
   }
 
   @override
@@ -444,7 +464,7 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                         TextFormField(
                                           controller: _dateController,
                                           decoration: const InputDecoration(
-                                            labelText: 'Select a date',
+                                            labelText: 'Select a date and time',
                                             border: OutlineInputBorder(
                                               borderSide: BorderSide(width: 1),
                                               borderRadius: BorderRadius.all(
@@ -458,10 +478,10 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                           ),
                                           readOnly: true,
                                           onTap: () => selectDate(context),
-                                          validator: (value) =>
-                                              value == null || value.isEmpty
-                                                  ? 'Please select a date'
-                                                  : null,
+                                          validator: (value) => value == null ||
+                                                  value.isEmpty
+                                              ? 'Please select a date and time'
+                                              : null,
                                         ),
                                         const SizedBox(height: 40),
                                         FilledButton(

@@ -1,3 +1,6 @@
+import 'package:kapame/services/current_user.dart';
+import 'package:kapame/services/trip_request_filter.dart';
+import 'package:provider/provider.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -113,8 +116,12 @@ class _PrivateDriverState extends State<PrivateDriver> {
       if (res.statusCode == 200) {
         final List<dynamic> tripsJson = res.data;
         final trips = tripsJson.map((json) => Trip.fromMap(json)).toList();
-        allTrips =
-            trips.where((trip) => trip.tripType == 'Private Commute').toList();
+        if (!mounted) return;
+        allTrips = filterTripRequests(
+          trips,
+          tripType: 'Private Commute',
+          auth: context.read<AuthUserState>(),
+        );
 
         _createMarkers(allTrips);
       } else {
@@ -166,6 +173,16 @@ class _PrivateDriverState extends State<PrivateDriver> {
     }).toList();
   }
 
+  double _getTripPriority(String? tripPriority) {
+    if (tripPriority == "Low") {
+      return BitmapDescriptor.hueGreen;
+    } else if (tripPriority == "Important") {
+      return BitmapDescriptor.hueOrange;
+    } else {
+      return BitmapDescriptor.hueRed;
+    }
+  }
+
   void _createMarkers(List<Trip> trips) {
     setState(() {
       markers.clear();
@@ -173,6 +190,9 @@ class _PrivateDriverState extends State<PrivateDriver> {
         markers.add(
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              _getTripPriority(trip.tripPriority),
+            ),
             position: LatLng(
               double.parse(trip.tripLocationInfo!.pickUpLatitude!),
               double.parse(trip.tripLocationInfo!.pickUpLongitude!),
@@ -182,7 +202,8 @@ class _PrivateDriverState extends State<PrivateDriver> {
                   'Unknown Location',
               snippet:
                   'Requester Contact Info: ${trip.contactDetailsPhoneNumber}',
-              onTap: () => Navigator.pushNamed(context, '/chat', arguments: trip),
+              onTap: () =>
+                  Navigator.pushNamed(context, '/chat', arguments: trip),
             ),
           ),
         );

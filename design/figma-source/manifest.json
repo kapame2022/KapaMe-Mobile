@@ -1,0 +1,339 @@
+{
+  "fileKey": "UEyMBlq1TERcemqacWKMUD",
+  "url": "https://www.figma.com/design/UEyMBlq1TERcemqacWKMUD",
+  "team": "Elementrix _May's Team",
+  "screenCount": 45,
+  "directions": {
+    "blue": {
+      "pageId": "0:1",
+      "boardId": "3:466",
+      "componentsId": "3:470",
+      "screens": [
+        {
+          "id": "3:506",
+          "name": "Screen / Home · find transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:580",
+          "name": "Screen / Home · offer transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:654",
+          "name": "Screen / Request · journey",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:708",
+          "name": "Screen / Request · details",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:765",
+          "name": "Screen / Request · review",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:829",
+          "name": "Screen / Request · confirmation",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:879",
+          "name": "Screen / Trips · upcoming",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:935",
+          "name": "Screen / Trips · past",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:991",
+          "name": "Screen / Messages",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:1040",
+          "name": "Screen / Trip chat",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:1086",
+          "name": "Screen / Profile",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:1154",
+          "name": "Screen / Map · Book transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:1220",
+          "name": "Screen / Map · Nearby requests",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:1281",
+          "name": "Screen / Map · Trip route",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "3:1336",
+          "name": "Screen / Trip chat · map context",
+          "width": 396,
+          "height": 900
+        }
+      ],
+      "counts": {
+        "PAGE": 1,
+        "FRAME": 354,
+        "TEXT": 377,
+        "INSTANCE": 60,
+        "VECTOR": 91,
+        "RECTANGLE": 13,
+        "COMPONENT_SET": 1,
+        "COMPONENT": 11
+      },
+      "fontFamilies": [
+        "Roboto"
+      ]
+    },
+    "community": {
+      "pageId": "5:153",
+      "boardId": "5:188",
+      "componentsId": "5:192",
+      "screens": [
+        {
+          "id": "5:228",
+          "name": "Screen / Home · find transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:296",
+          "name": "Screen / Home · offer transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:364",
+          "name": "Screen / Request · journey",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:418",
+          "name": "Screen / Request · details",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:475",
+          "name": "Screen / Request · review",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:539",
+          "name": "Screen / Request · confirmation",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:589",
+          "name": "Screen / Trips · upcoming",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:645",
+          "name": "Screen / Trips · past",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:701",
+          "name": "Screen / Messages",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:750",
+          "name": "Screen / Trip chat",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:796",
+          "name": "Screen / Profile",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:864",
+          "name": "Screen / Map · Book transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:930",
+          "name": "Screen / Map · Nearby requests",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:991",
+          "name": "Screen / Map · Trip route",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1046",
+          "name": "Screen / Trip chat · map context",
+          "width": 396,
+          "height": 900
+        }
+      ],
+      "counts": {
+        "PAGE": 1,
+        "FRAME": 366,
+        "TEXT": 378,
+        "INSTANCE": 44,
+        "VECTOR": 91,
+        "RECTANGLE": 21,
+        "COMPONENT_SET": 1,
+        "COMPONENT": 11
+      },
+      "fontFamilies": [
+        "Noto Serif",
+        "Roboto"
+      ]
+    },
+    "city": {
+      "pageId": "5:1103",
+      "boardId": "5:1138",
+      "componentsId": "5:1142",
+      "screens": [
+        {
+          "id": "5:1178",
+          "name": "Screen / Home · find transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1252",
+          "name": "Screen / Home · offer transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1326",
+          "name": "Screen / Request · journey",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1380",
+          "name": "Screen / Request · details",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1437",
+          "name": "Screen / Request · review",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1501",
+          "name": "Screen / Request · confirmation",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1551",
+          "name": "Screen / Trips · upcoming",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1607",
+          "name": "Screen / Trips · past",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1663",
+          "name": "Screen / Messages",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1712",
+          "name": "Screen / Trip chat",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1758",
+          "name": "Screen / Profile",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1826",
+          "name": "Screen / Map · Book transport",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1892",
+          "name": "Screen / Map · Nearby requests",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:1953",
+          "name": "Screen / Map · Trip route",
+          "width": 396,
+          "height": 900
+        },
+        {
+          "id": "5:2008",
+          "name": "Screen / Trip chat · map context",
+          "width": 396,
+          "height": 900
+        }
+      ],
+      "counts": {
+        "PAGE": 1,
+        "FRAME": 356,
+        "TEXT": 376,
+        "INSTANCE": 60,
+        "VECTOR": 91,
+        "RECTANGLE": 13,
+        "COMPONENT_SET": 1,
+        "COMPONENT": 11
+      },
+      "fontFamilies": [
+        "Roboto"
+      ]
+    }
+  }
+}

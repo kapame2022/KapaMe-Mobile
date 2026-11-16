@@ -1,0 +1,56 @@
+[
+  {
+    "index": 1,
+    "key": "ClearBlue",
+    "name": "Clear Blue",
+    "radius": 20,
+    "description": "Calm, confident and familiar. Clear hierarchy, generous space and useful journeys.",
+    "colors": {
+      "bg": "#f4f7fb",
+      "panel": "#ffffff",
+      "ink": "#102d49",
+      "muted": "#5d6d7b",
+      "line": "#dce5ed",
+      "accent": "#0868b9",
+      "soft": "#e4f1ff",
+      "orange": "#a94d0b",
+      "map": "#eaf0ef"
+    }
+  },
+  {
+    "index": 2,
+    "key": "Community",
+    "name": "Community",
+    "radius": 25,
+    "description": "Warm, human and connected. Editorial headings, soft surfaces and people at the centre.",
+    "colors": {
+      "bg": "#f9f5ed",
+      "panel": "#fffdf9",
+      "ink": "#243c38",
+      "muted": "#687067",
+      "line": "#e2dfd3",
+      "accent": "#285f55",
+      "soft": "#e4ede3",
+      "orange": "#a34c1f",
+      "map": "#eaf0e8"
+    }
+  },
+  {
+    "index": 3,
+    "key": "CityMotion",
+    "name": "City Motion",
+    "radius": 10,
+    "description": "Direct, energetic and urban. Strong typography, compact geometry and decisive actions.",
+    "colors": {
+      "bg": "#f1f3f3",
+      "panel": "#ffffff",
+      "ink": "#102936",
+      "muted": "#586a75",
+      "line": "#d8e0e3",
+      "accent": "#005e85",
+      "soft": "#dceff5",
+      "orange": "#aa4b00",
+      "map": "#e8eef0"
+    }
+  }
+]

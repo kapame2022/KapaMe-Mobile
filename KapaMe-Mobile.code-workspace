@@ -5,5 +5,8 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive",
+		"java.import.gradle.java.home": "/home/kapame/Downloads/android-studio/jbr"
+	}
 }

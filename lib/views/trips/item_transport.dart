@@ -1,3 +1,4 @@
+import 'package:kapame/widgets/trip_date_time_picker.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -51,18 +52,16 @@ class _ItemTransportState extends State<ItemTransport> {
   DateTime? tripDateTime;
   TextEditingController tripDateTimeController = TextEditingController();
   Future<void> selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showTripDateTimePicker(
       context: context,
-      initialDate: tripDateTime ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDateTime: tripDateTime,
     );
-    if (picked != null && picked != tripDateTime) {
-      setState(() {
-        tripDateTime = picked;
-        tripDateTimeController.text = "${picked.toLocal()}".split(' ')[0];
-      });
-    }
+    if (picked == null || !mounted || !context.mounted) return;
+
+    setState(() {
+      tripDateTime = picked;
+      tripDateTimeController.text = formatTripDateTime(picked);
+    });
   }
 
   BannerAd? _bannerAd;
@@ -99,6 +98,7 @@ class _ItemTransportState extends State<ItemTransport> {
     phoneNumberController.dispose();
     emailController.dispose();
     tripPriorityController.dispose();
+    tripDateTimeController.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -427,7 +427,7 @@ class _ItemTransportState extends State<ItemTransport> {
                                             ),
                                           ),
                                         ),
-                                        value: selectedPriority,
+                                        initialValue: selectedPriority,
                                         onChanged: (String? newValue) {
                                           tripPriorityController.text =
                                               newValue.toString();
@@ -460,7 +460,7 @@ class _ItemTransportState extends State<ItemTransport> {
                                             ),
                                           ),
                                         ),
-                                        value: selectedSchedule,
+                                        initialValue: selectedSchedule,
                                         onChanged: (String? newValue) {
                                           tripScheduleController.text =
                                               newValue.toString();
@@ -480,7 +480,7 @@ class _ItemTransportState extends State<ItemTransport> {
                                       TextFormField(
                                         controller: tripDateTimeController,
                                         decoration: const InputDecoration(
-                                          labelText: 'Select a date',
+                                          labelText: 'Select a date and time',
                                           border: OutlineInputBorder(
                                             borderSide: BorderSide(width: 1),
                                             borderRadius: BorderRadius.all(
@@ -496,10 +496,10 @@ class _ItemTransportState extends State<ItemTransport> {
                                         ),
                                         readOnly: true,
                                         onTap: () => selectDate(context),
-                                        validator: (value) =>
-                                            value == null || value.isEmpty
-                                                ? 'Please select a date'
-                                                : null,
+                                        validator: (value) => value == null ||
+                                                value.isEmpty
+                                            ? 'Please select a date and time'
+                                            : null,
                                       ),
                                       const SizedBox(height: 40),
                                       // Submit Button

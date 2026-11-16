@@ -5,10 +5,12 @@ import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/auth_response.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kapame/services/session_storage.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  const Login({super.key, this.dio});
+
+  final Dio? dio;
 
   @override
   State<Login> createState() => _LoginState();
@@ -25,7 +27,8 @@ class _LoginState extends State<Login> {
   bool isComplete = false;
   bool obscureText = true;
 
-  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+  bool rememberMe = false;
+  final SessionStorage _sessionStorage = SessionStorage();
 
   @override
   void dispose() {
@@ -43,15 +46,12 @@ class _LoginState extends State<Login> {
     setState(() {
       isLoading = true;
     });
+    final shouldRemember = rememberMe;
     try {
-      final Dio dio = Dio();
+      final Dio dio = widget.dio ?? Dio();
 
       dio.options.connectTimeout = const Duration(seconds: 30);
       dio.options.receiveTimeout = const Duration(seconds: 30);
-
-      setState(() {
-        isLoading = true;
-      });
 
       var res = await dio
           .post('https://kapameapi.azurewebsites.net/api/auth/login', data: {
@@ -69,8 +69,9 @@ class _LoginState extends State<Login> {
           DateTime.parse(res.data['expireDate']),
         );
 
-        // Save token to secure storage
-        await secureStorage.write(key: 'token', value: currentUser.token);
+        if (!currentUser.isSuccess || currentUser.token.isEmpty) return null;
+        await _sessionStorage.save(currentUser, rememberMe: shouldRemember);
+        if (!mounted) return null;
 
         setState(() {
           isSuccess = true;
@@ -79,22 +80,22 @@ class _LoginState extends State<Login> {
         return currentUser;
       }
     } catch (e) {
-      print("error: $e");
-      setState(() {
-        isLoading = false;
-      });
-      if (e is DioException) {
-        Fluttertoast.showToast(
-          msg: e.response!.data['message'],
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
-      }
+      if (!mounted) return null;
+      final data = e is DioException ? e.response?.data : null;
+      Fluttertoast.showToast(
+        msg: data is Map && data['message'] is String
+            ? data['message'] as String
+            : 'Unable to sign in. Please try again.',
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
       return null;
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
     return null;
   }
@@ -201,26 +202,46 @@ class _LoginState extends State<Login> {
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 40),
+                              CheckboxListTile(
+                                contentPadding: EdgeInsets.zero,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                title: const Text('Remember me'),
+                                value: rememberMe,
+                                onChanged: isLoading
+                                    ? null
+                                    : (value) => setState(() {
+                                          rememberMe = value ?? false;
+                                        }),
+                              ),
+                              const SizedBox(height: 20),
                               FilledButton(
-                                onPressed: () async {
-                                  AuthResponse? authRes = await loginUser();
+                                onPressed: isLoading
+                                    ? null
+                                    : () async {
+                                        AuthResponse? authRes =
+                                            await loginUser();
+                                        if (!context.mounted) return;
 
-                                  if (authRes?.isSuccess == true) {
-                                    Provider.of<AuthUserState>(context,
-                                            listen: false)
-                                        .updateAuthUser(
-                                            inMessage: authRes!.message,
-                                            inIsSuccess: authRes.isSuccess,
-                                            inToken: authRes.token,
-                                            inErrors: authRes.errors,
-                                            inAppUser: authRes.user,
-                                            inExpireDate: authRes.expireDate ??
-                                                DateTime.now());
-                                    Navigator.pushReplacementNamed(
-                                        context, '/home');
-                                  }
-                                },
+                                        if (authRes?.isSuccess == true) {
+                                          Provider.of<AuthUserState>(context,
+                                                  listen: false)
+                                              .updateAuthUser(
+                                                  inMessage: authRes!.message,
+                                                  inIsSuccess:
+                                                      authRes.isSuccess,
+                                                  inToken: authRes.token,
+                                                  inErrors: authRes.errors,
+                                                  inAppUser: authRes.user,
+                                                  inExpireDate:
+                                                      authRes.expireDate ??
+                                                          DateTime.now());
+                                          Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              '/home',
+                                              (route) => false);
+                                        }
+                                      },
                                 style: ButtonStyle(
                                   shape: const WidgetStatePropertyAll(
                                     RoundedRectangleBorder(

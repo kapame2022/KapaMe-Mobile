@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:kapame/services/new_user.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kapame/models/auth_response.dart';
+import 'package:kapame/services/session_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 //routes
@@ -49,23 +50,29 @@ void main() async {
     });
   });
 
-  const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  String? savedToken = await secureStorage.read(key: 'token');
+  AuthResponse? savedSession;
+  try {
+    savedSession = await SessionStorage().restore();
+  } catch (_) {
+    debugPrint('Saved session unavailable; sign in again.');
+  }
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => UserState()),
         ChangeNotifierProvider(
-            create: (context) => AuthUserState(inToken: savedToken)),
+            create: (context) => AuthUserState(session: savedSession)),
       ],
-      child: const MyApp(),
+      child: MyApp(initialRoute: savedSession == null ? '/' : '/home'),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.initialRoute = '/'});
+
+  final String initialRoute;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +83,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade300),
         useMaterial3: true,
       ),
-      initialRoute: '/',
+      initialRoute: initialRoute,
       routes: {
         '/': (context) => const LandingPage(),
         '/register': (context) => const Register(),

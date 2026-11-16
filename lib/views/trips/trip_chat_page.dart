@@ -21,6 +21,7 @@ class _TripChatPageState extends State<TripChatPage>
   TripChatController? _controller;
   String? _recipient;
   String? _sessionKey;
+  String? _unavailableReason;
 
   @override
   void initState() {
@@ -37,12 +38,20 @@ class _TripChatPageState extends State<TripChatPage>
         ? auth.appUser!.id
         : TripChatController.userIdFromToken(token);
     final trip = widget.trip;
-    final session = '$userId:$token:${trip?.tripId}';
+    final session =
+        '$userId:$token:${trip?.tripId}:${trip?.requester}:${trip?.transporter}';
     if (_sessionKey == session) return;
     _sessionKey = session;
     _controller?.dispose();
     _controller = null;
-    if (userId == null || token.isEmpty || trip?.tripId?.isNotEmpty != true) {
+    _unavailableReason = null;
+    if (userId == null || userId.isEmpty || token.isEmpty) {
+      _unavailableReason = 'Please sign in to chat about this trip.';
+      return;
+    }
+    if (trip?.tripId?.isNotEmpty != true) {
+      _unavailableReason =
+          'Trip details are missing. Go back and open the request again.';
       return;
     }
     _recipient = trip!.requester?.toLowerCase() == userId.toLowerCase()
@@ -52,6 +61,11 @@ class _TripChatPageState extends State<TripChatPage>
         _recipient!.isEmpty ||
         _recipient == '00000000-0000-0000-0000-000000000000' ||
         _recipient!.toLowerCase() == userId.toLowerCase()) {
+      _unavailableReason = trip.requester?.toLowerCase() == userId.toLowerCase()
+          ? 'You created this request. There is no transporter to chat with '
+              'yet. You cannot start a chat with yourself.'
+          : 'This request is missing the requester’s contact details, '
+              'so a chat cannot be opened.';
       return;
     }
     _controller = TripChatController(
@@ -84,11 +98,11 @@ class _TripChatPageState extends State<TripChatPage>
     if (controller == null) {
       return Scaffold(
           appBar: AppBar(title: const Text('Trip chat')),
-          body: const Center(
+          body: Center(
               child: Padding(
-                  padding: EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(24),
                   child: Text(
-                      'Open a trip with a contact to start chatting. Make sure you are signed in.',
+                      _unavailableReason ?? 'This trip chat is unavailable.',
                       textAlign: TextAlign.center))));
     }
     return Chat(

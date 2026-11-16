@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 
 class CustomInfoWindow extends StatelessWidget {
@@ -9,12 +7,12 @@ class CustomInfoWindow extends StatelessWidget {
   final VoidCallback onClose;
 
   const CustomInfoWindow({
-    Key? key,
+    super.key,
     required this.title,
     required this.snippet,
     required this.onClick,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

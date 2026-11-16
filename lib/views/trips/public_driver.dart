@@ -1,3 +1,6 @@
+import 'package:kapame/services/current_user.dart';
+import 'package:kapame/services/trip_request_filter.dart';
+import 'package:provider/provider.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -110,8 +113,12 @@ class _PublicDriverState extends State<PublicDriver> {
       if (res.statusCode == 200) {
         final List<dynamic> tripsJson = res.data;
         final trips = tripsJson.map((json) => Trip.fromMap(json)).toList();
-        allTrips =
-            trips.where((trip) => trip.tripType == 'Public Commute').toList();
+        if (!mounted) return;
+        allTrips = filterTripRequests(
+          trips,
+          tripType: 'Public Commute',
+          auth: context.read<AuthUserState>(),
+        );
 
         _createMarkers(allTrips);
       } else {
@@ -151,6 +158,16 @@ class _PublicDriverState extends State<PublicDriver> {
     }).toList();
   }
 
+  double _getTripPriority(String? tripPriority) {
+    if (tripPriority == "Low") {
+      return BitmapDescriptor.hueGreen;
+    } else if (tripPriority == "Important") {
+      return BitmapDescriptor.hueOrange;
+    } else {
+      return BitmapDescriptor.hueRed;
+    }
+  }
+
   bool _showCustomWindow = false;
   Trip? _selectedTrip;
 
@@ -161,6 +178,9 @@ class _PublicDriverState extends State<PublicDriver> {
         markers.add(
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              _getTripPriority(trip.tripPriority),
+            ),
             onTap: () {
               setState(() {
                 _showCustomWindow = true;
@@ -214,9 +234,9 @@ class _PublicDriverState extends State<PublicDriver> {
                     right: 20,
                     child: CustomInfoWindow(
                       title:
-                          "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress != null ? _selectedTrip!.tripLocationInfo!.pickUpAddress : 'No address'}",
+                          "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress ?? 'No address'}",
                       snippet:
-                          "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress != null ? _selectedTrip!.tripLocationInfo!.destinationAddress : 'No address'}",
+                          "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress ?? 'No address'}",
                       onClick: () => Navigator.pushNamed(
                         context,
                         '/viewrequest',

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kapame/services/auth.dart';
+import 'package:kapame/services/session_storage.dart';
+import 'package:kapame/services/current_user.dart';
+import 'package:provider/provider.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
@@ -128,10 +130,23 @@ class Settings extends StatelessWidget {
                     margin:
                         const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
                     child: FilledButton(
-                      onPressed: () {
-                        AuthService authService = AuthService();
-                        authService.logout();
-                        Navigator.pushNamed(context, '/');
+                      onPressed: () async {
+                        final auth = context.read<AuthUserState>();
+                        try {
+                          await SessionStorage().clear();
+                          auth.clear();
+                          if (!context.mounted) return;
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/', (route) => false);
+                        } catch (_) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Unable to log out. Please try again.'),
+                            ),
+                          );
+                        }
                       },
                       style: ButtonStyle(
                         backgroundColor:

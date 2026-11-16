@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:kapame/models/app_user.dart';
+import 'package:kapame/models/auth_response.dart';
 
 class AuthUserState extends ChangeNotifier {
   String? _message = '';
   bool? _isSuccess = false;
   String? _token = '';
   List<String>? _errors;
-  AppUser? _user = AppUser();
-  DateTime? _expireDate = DateTime.now();
+  AppUser? _user;
+  DateTime? _expireDate;
 
   String? get message => _message;
   bool? get isSuccess => _isSuccess;
@@ -16,23 +17,38 @@ class AuthUserState extends ChangeNotifier {
   AppUser? get appUser => _user;
   DateTime? get expireDate => _expireDate;
 
-  AuthUserState({String? inToken}) {
-    _token = inToken;
+  AuthUserState({String? inToken, AuthResponse? session}) {
+    _token = session?.token ?? inToken;
+    _message = session?.message;
+    _isSuccess = session?.isSuccess ?? false;
+    _errors = session?.errors;
+    _user = session?.user;
+    _expireDate = session?.expireDate;
   }
 
-  Future<void>? updateAuthUser(
+  Future<void> updateAuthUser(
       {String? inMessage,
       bool? inIsSuccess,
       String? inToken,
       List<String>? inErrors,
       AppUser? inAppUser,
       DateTime? inExpireDate}) async {
-    _message = inMessage;
-    _isSuccess = inIsSuccess;
-    _token = inToken;
-    _errors = inErrors;
-    _user = inAppUser;
-    _expireDate = inExpireDate;
+    _message = inMessage ?? _message;
+    _isSuccess = inIsSuccess ?? _isSuccess;
+    _token = inToken ?? _token;
+    _errors = inErrors ?? _errors;
+    _user = inAppUser ?? _user;
+    _expireDate = inExpireDate ?? _expireDate;
+    notifyListeners();
+  }
+
+  void clear() {
+    _message = null;
+    _isSuccess = false;
+    _token = null;
+    _errors = null;
+    _user = null;
+    _expireDate = null;
     notifyListeners();
   }
 }

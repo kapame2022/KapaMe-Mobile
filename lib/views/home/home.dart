@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/app_user.dart';
@@ -101,7 +100,7 @@ class _HomeState extends State<Home> {
                       },
                     ),
                     IconButton(
-                      icon: const Icon(Icons.inbox),
+                      icon: const Icon(Icons.message),
                       onPressed: () {
                         Navigator.pushNamed(context, '/messages');
                       },
@@ -384,14 +383,6 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: scrollToBottom,
-        child: const Icon(
-          Icons.arrow_downward_rounded,
-        ),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       bottomNavigationBar: _isAdLoaded && _bannerAd != null
           ? SafeArea(

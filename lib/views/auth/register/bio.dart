@@ -64,7 +64,7 @@ class _BioState extends State<Bio> {
           ),
           child: DropdownButtonFormField<String>(
             hint: const Text('Select gender'),
-            value: selectedGender,
+            initialValue: selectedGender,
             onChanged: (String? newValue) {
               Provider.of<UserState>(context, listen: false)
                   .updateGender(newValue ?? '');

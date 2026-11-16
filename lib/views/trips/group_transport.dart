@@ -1,6 +1,6 @@
+import 'package:kapame/widgets/trip_date_time_picker.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,7 +11,6 @@ import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 class GroupTransport extends StatefulWidget {
   const GroupTransport({super.key});
@@ -83,24 +82,16 @@ class _GroupTransportState extends State<GroupTransport> {
   }
 
   Future<void> selectDate(BuildContext context) async {
-    final DateTime? date = await showDatePicker(
+    final picked = await showTripDateTimePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialDateTime: tripDateTime,
     );
-    if (date == null) return;
+    if (picked == null || !mounted || !context.mounted) return;
 
-    final TimeOfDay? time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time == null) return;
-
-    final DateTime dateTime =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    // Assuming you have a TextEditingController named _controller
-    _dateController.text = DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
+    setState(() {
+      tripDateTime = picked;
+      _dateController.text = formatTripDateTime(picked);
+    });
   }
 
   @override
@@ -111,6 +102,7 @@ class _GroupTransportState extends State<GroupTransport> {
     emailController.dispose();
     numberOfPeopleController.dispose();
     tripPriorityController.dispose();
+    _dateController.dispose();
     _bannerAd?.dispose();
     super.dispose();
   }
@@ -466,7 +458,7 @@ class _GroupTransportState extends State<GroupTransport> {
                                             ),
                                           ),
                                         ),
-                                        value: selectedPriority,
+                                        initialValue: selectedPriority,
                                         onChanged: (String? newValue) {
                                           tripPriorityController.text =
                                               newValue.toString();
@@ -499,7 +491,7 @@ class _GroupTransportState extends State<GroupTransport> {
                                             ),
                                           ),
                                         ),
-                                        value: selectedSchedule,
+                                        initialValue: selectedSchedule,
                                         onChanged: (String? newValue) {
                                           tripScheduleController.text =
                                               newValue.toString();
@@ -519,7 +511,7 @@ class _GroupTransportState extends State<GroupTransport> {
                                       TextFormField(
                                         controller: _dateController,
                                         decoration: const InputDecoration(
-                                          labelText: 'Select a date',
+                                          labelText: 'Select a date and time',
                                           border: OutlineInputBorder(
                                             borderSide: BorderSide(width: 1),
                                             borderRadius: BorderRadius.all(
@@ -535,10 +527,10 @@ class _GroupTransportState extends State<GroupTransport> {
                                         ),
                                         readOnly: true,
                                         onTap: () => selectDate(context),
-                                        validator: (value) =>
-                                            value == null || value.isEmpty
-                                                ? 'Please select a date'
-                                                : null,
+                                        validator: (value) => value == null ||
+                                                value.isEmpty
+                                            ? 'Please select a date and time'
+                                            : null,
                                       ),
                                       const SizedBox(height: 40),
                                       // Submit Button

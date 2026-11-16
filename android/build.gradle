@@ -11,6 +11,13 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
+    project.plugins.withId('com.android.library') {
+        project.androidComponents.finalizeDsl { androidDsl ->
+            // Older plugins pin SDKs below their transitive AndroidX requirements.
+            androidDsl.compileSdk = Math.max(
+                androidDsl.compileSdk ?: 0, project(':app').android.compileSdk)
+        }
+    }
 }
 
 tasks.register("clean", Delete) {

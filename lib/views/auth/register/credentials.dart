@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class Credentials extends StatefulWidget {
-  const Credentials({Key? key}) : super(key: key);
+  const Credentials({super.key});
 
   @override
   State<Credentials> createState() => _CredentialsState();

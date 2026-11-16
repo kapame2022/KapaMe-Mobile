@@ -1,3 +1,7 @@
+import 'package:kapame/services/current_user.dart';
+import 'package:kapame/services/trip_request_filter.dart';
+import 'package:provider/provider.dart';
+import 'package:kapame/widgets/trip_date_time_picker.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -119,8 +123,12 @@ class _ItemTransporterState extends State<ItemTransporter> {
       if (res.statusCode == 200) {
         final List<dynamic> tripsJson = res.data;
         final trips = tripsJson.map((json) => Trip.fromMap(json)).toList();
-        allTrips =
-            trips.where((trip) => trip.tripType == 'Item Transport').toList();
+        if (!mounted) return;
+        allTrips = filterTripRequests(
+          trips,
+          tripType: 'Item Transport',
+          auth: context.read<AuthUserState>(),
+        );
 
         _createMarkers(allTrips);
       } else {
@@ -174,6 +182,16 @@ class _ItemTransporterState extends State<ItemTransporter> {
     }).toList();
   }
 
+  double _getTripPriority(String? tripPriority) {
+    if (tripPriority == "Low") {
+      return BitmapDescriptor.hueGreen;
+    } else if (tripPriority == "Important") {
+      return BitmapDescriptor.hueOrange;
+    } else {
+      return BitmapDescriptor.hueRed;
+    }
+  }
+
   bool _showCustomWindow = false;
   Trip? _selectedTrip;
 
@@ -184,6 +202,9 @@ class _ItemTransporterState extends State<ItemTransporter> {
         markers.add(
           Marker(
             markerId: MarkerId(trip.tripId.toString()),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              _getTripPriority(trip.tripPriority),
+            ),
             onTap: () {
               setState(() {
                 _showCustomWindow = true;
@@ -202,18 +223,16 @@ class _ItemTransporterState extends State<ItemTransporter> {
   }
 
   Future<void> selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showTripDateTimePicker(
       context: context,
-      initialDate: tripDateTime ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDateTime: tripDateTime,
     );
-    if (picked != null && picked != tripDateTime) {
-      setState(() {
-        tripDateTime = picked;
-        tripDateTimeController.text = "${picked.toLocal()}".split(' ')[0];
-      });
-    }
+    if (picked == null || !mounted || !context.mounted) return;
+
+    setState(() {
+      tripDateTime = picked;
+      tripDateTimeController.text = formatTripDateTime(picked);
+    });
   }
 
   @override
@@ -254,9 +273,9 @@ class _ItemTransporterState extends State<ItemTransporter> {
                     right: 20,
                     child: CustomInfoWindow(
                       title:
-                          "Pickup Address: \\${_selectedTrip!.tripLocationInfo!.pickUpAddress != null ? _selectedTrip!.tripLocationInfo!.pickUpAddress : 'No address'}",
+                          "Pickup Address: \\${_selectedTrip!.tripLocationInfo!.pickUpAddress ?? 'No address'}",
                       snippet:
-                          "Destination Address: \\${_selectedTrip!.tripLocationInfo!.destinationAddress != null ? _selectedTrip!.tripLocationInfo!.destinationAddress : 'No address'}",
+                          "Destination Address: \\${_selectedTrip!.tripLocationInfo!.destinationAddress ?? 'No address'}",
                       onClick: () => Navigator.pushNamed(
                         context,
                         '/viewrequest',
@@ -406,7 +425,7 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                         TextFormField(
                                           controller: tripDateTimeController,
                                           decoration: const InputDecoration(
-                                            labelText: 'Select a date',
+                                            labelText: 'Select a date and time',
                                             border: OutlineInputBorder(
                                               borderSide: BorderSide(width: 1),
                                               borderRadius: BorderRadius.all(
@@ -422,10 +441,10 @@ class _ItemTransporterState extends State<ItemTransporter> {
                                           ),
                                           readOnly: true,
                                           onTap: () => selectDate(context),
-                                          validator: (value) =>
-                                              value == null || value.isEmpty
-                                                  ? 'Please select a date'
-                                                  : null,
+                                          validator: (value) => value == null ||
+                                                  value.isEmpty
+                                              ? 'Please select a date and time'
+                                              : null,
                                         ),
                                         const SizedBox(height: 40),
                                         FilledButton(

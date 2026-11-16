@@ -1,30 +1,47 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:kapame/main.dart';
+import 'package:kapame/models/app_user.dart';
+import 'package:kapame/models/auth_response.dart';
+import 'package:kapame/services/current_user.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  testWidgets('signed-out startup shows the landing page', (tester) async {
     await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+    expect(find.text('Log in'), findsOneWidget);
+    expect(find.text('Register'), findsOneWidget);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('restored startup opens Home with the saved user',
+      (tester) async {
+    const adsChannel = 'plugins.flutter.io/google_mobile_ads';
+    tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      adsChannel,
+      (_) async => const StandardMethodCodec().encodeSuccessEnvelope(null),
+    );
+    addTearDown(() => tester.binding.defaultBinaryMessenger
+        .setMockMessageHandler(adsChannel, null));
+    final auth = AuthUserState(
+        session: AuthResponse(
+      'Restored',
+      true,
+      'test-token',
+      null,
+      AppUser(id: 'user-123', fullName: 'Test User'),
+      DateTime.now().add(const Duration(hours: 2)),
+    ));
+    addTearDown(auth.dispose);
+    await tester.pumpWidget(ChangeNotifierProvider.value(
+      value: auth,
+      child: const MyApp(initialRoute: '/home'),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome back, Test User'), findsOneWidget);
+    expect(find.text('Log in'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
   });
 }

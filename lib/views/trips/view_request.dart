@@ -141,33 +141,50 @@ class _ViewRequestState extends State<ViewRequest> {
     return Scaffold(
       body: currentTrip == null
           ? const Center(child: Text('No trip data'))
-          : Column(
+          : Stack(
+              fit: StackFit.expand,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (pickUpLat != null && pickUpLng != null)
-                        Expanded(
-                          child: GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: LatLng(pickUpLat, pickUpLng),
-                              zoom: 10,
-                            ),
-                            markers: Set<Marker>.of(tripMarkers),
-                            polylines: polylines,
-                            onMapCreated: (controller) {
-                              mapController = controller;
-                            },
-                            myLocationButtonEnabled: false,
-                          ),
+                if (pickUpLat != null && pickUpLng != null)
+                  GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(pickUpLat, pickUpLng),
+                      zoom: 10,
+                    ),
+                    markers: Set<Marker>.of(tripMarkers),
+                    polylines: polylines,
+                    padding: const EdgeInsets.only(bottom: 92),
+                    onMapCreated: (controller) {
+                      mapController = controller;
+                    },
+                    myLocationButtonEnabled: false,
+                  )
+                else
+                  const Center(child: Text('No map location available.')),
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                  child: SafeArea(
+                    top: false,
+                    child: FilledButton.icon(
+                      onPressed: () => Navigator.pushNamed(
+                        context,
+                        '/chat',
+                        arguments: currentTrip,
+                      ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 19, 161, 232),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 60),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      if (pickUpLat == null || pickUpLng == null)
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text('No map location available.'),
-                        ),
-                    ],
+                      ),
+                      icon: const Icon(Icons.chat_bubble_outline_rounded),
+                      label: const Text('Chat with requester'),
+                    ),
                   ),
                 ),
               ],
