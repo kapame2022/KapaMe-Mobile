@@ -1,3 +1,5 @@
+import 'package:kapame/widgets/clear_blue_widgets.dart';
+import 'package:kapame/theme/clear_blue.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:kapame/services/current_user.dart';
@@ -118,6 +120,7 @@ class _MessagesState extends State<Messages> with WidgetsBindingObserver {
     final controller = _controller;
     if (controller == null) {
       return Scaffold(
+          bottomNavigationBar: const MainNavigation(selected: 2),
           appBar: AppBar(title: const Text('Messages')),
           body: const Center(child: Text('Sign in to view your messages.')));
     }
@@ -136,126 +139,131 @@ class _MessagesState extends State<Messages> with WidgetsBindingObserver {
                 (item.latest.message ?? '').toLowerCase().contains(query))
             .toList();
         return Scaffold(
-          appBar: AppBar(title: const Text('Messages'), actions: [
-            IconButton(
-                tooltip: 'Refresh messages',
-                icon: const Icon(Icons.refresh),
-                onPressed: controller.loading ? null : controller.refresh),
-          ]),
+          bottomNavigationBar: const MainNavigation(selected: 2),
           body: SafeArea(
-              top: false,
               child: Column(children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: TextField(
-                      controller: _search,
-                      decoration: InputDecoration(
-                        hintText: 'Search conversations',
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: colors.surfaceContainerLow,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none),
-                      )),
-                ),
-                Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                        switch (controller.connection) {
-                          ChatConnection.connected => 'Live updates connected',
-                          ChatConnection.connecting =>
-                            'Connecting to live updates…',
-                          ChatConnection.reconnecting => 'Reconnecting…',
-                          ChatConnection.offline =>
-                            'Live updates offline · Pull down to refresh',
-                        },
-                        style: TextStyle(
-                            color: colors.onSurfaceVariant, fontSize: 12))),
-                if (controller.loading) const LinearProgressIndicator(),
-                if (controller.error != null)
-                  Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(controller.error!,
-                          style: TextStyle(color: colors.error))),
-                Expanded(
-                    child: RefreshIndicator(
-                  onRefresh: controller.refresh,
-                  child: ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    itemCount: conversations.isEmpty ? 1 : conversations.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      if (conversations.isEmpty) {
-                        return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 80),
-                            child: Column(children: [
-                              Icon(Icons.forum_outlined,
-                                  size: 48, color: colors.primary),
-                              const SizedBox(height: 16),
-                              Text(controller.loading
-                                  ? 'Loading conversations…'
-                                  : query.isEmpty
-                                      ? 'No conversations yet'
-                                      : 'No matching conversations'),
-                            ]));
-                      }
-                      final conversation = conversations[index];
-                      final unread = _unread(conversation);
-                      final date = conversation.latest.timestamp?.toLocal();
-                      return Material(
-                        color: unread
-                            ? colors.primaryContainer.withValues(alpha: 0.4)
-                            : colors.surfaceContainerLow,
-                        borderRadius: BorderRadius.circular(16),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)),
-                          leading: CircleAvatar(
-                              backgroundColor: colors.primaryContainer,
-                              child: Icon(Icons.chat_bubble_outline,
-                                  color: colors.onPrimaryContainer)),
-                          title: Text(
-                              controller.contactName(conversation.otherUserId),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontWeight: unread
-                                      ? FontWeight.w700
-                                      : FontWeight.w500)),
-                          subtitle: Text(conversation.latest.message ?? '',
-                              maxLines: 2, overflow: TextOverflow.ellipsis),
-                          trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (date != null)
-                                  Text(
-                                      DateUtils.isSameDay(date, DateTime.now())
-                                          ? MaterialLocalizations.of(context)
-                                              .formatTimeOfDay(
-                                                  TimeOfDay.fromDateTime(date))
-                                          : MaterialLocalizations.of(context)
-                                              .formatShortDate(date),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelSmall),
-                                if (unread) ...[
-                                  const SizedBox(height: 8),
-                                  CircleAvatar(
-                                      radius: 4,
-                                      backgroundColor: colors.primary)
-                                ],
-                              ]),
-                          onTap: () => _open(conversation),
-                        ),
-                      );
+            Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+                child: BrandHeader(
+                    name: context.watch<AuthUserState?>()?.appUser?.fullName)),
+            if (MediaQuery.sizeOf(context).height > 650 &&
+                MediaQuery.textScalerOf(context).scale(14) < 22)
+              const Padding(
+                  padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
+                  child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: PageHeading(
+                          eyebrow: 'STAY CONNECTED',
+                          title: 'A little chat.\nA smoother trip.'))),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+              child: TextField(
+                  controller: _search,
+                  decoration: InputDecoration(
+                    hintText: 'Search conversations',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: ClearBlue.panel,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(color: ClearBlue.line)),
+                  )),
+            ),
+            Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                    switch (controller.connection) {
+                      ChatConnection.connected => 'Live updates connected',
+                      ChatConnection.connecting =>
+                        'Connecting to live updates…',
+                      ChatConnection.reconnecting => 'Reconnecting…',
+                      ChatConnection.offline =>
+                        'Live updates offline · Pull down to refresh',
                     },
-                  ),
-                )),
-              ])),
+                    style: TextStyle(
+                        color: colors.onSurfaceVariant, fontSize: 12))),
+            if (controller.loading) const LinearProgressIndicator(),
+            if (controller.error != null)
+              Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(controller.error!,
+                      style: TextStyle(color: colors.error))),
+            Expanded(
+                child: RefreshIndicator(
+              onRefresh: controller.refresh,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                itemCount: conversations.isEmpty ? 1 : conversations.length,
+                separatorBuilder: (_, __) => const Divider(height: 16),
+                itemBuilder: (context, index) {
+                  if (conversations.isEmpty) {
+                    return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 80),
+                        child: Column(children: [
+                          Icon(Icons.forum_outlined,
+                              size: 48, color: colors.primary),
+                          const SizedBox(height: 16),
+                          Text(controller.loading
+                              ? 'Loading conversations…'
+                              : query.isEmpty
+                                  ? 'No conversations yet'
+                                  : 'No matching conversations'),
+                        ]));
+                  }
+                  final conversation = conversations[index];
+                  final unread = _unread(conversation);
+                  final date = conversation.latest.timestamp?.toLocal();
+                  return Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 0, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      leading: CircleAvatar(
+                          backgroundColor: colors.primaryContainer,
+                          child: Text(
+                              userInitials(controller
+                                  .contactName(conversation.otherUserId)),
+                              style: const TextStyle(
+                                  fontSize: 12, color: ClearBlue.accent))),
+                      title: Text(
+                          controller.contactName(conversation.otherUserId),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight:
+                                  unread ? FontWeight.w700 : FontWeight.w500)),
+                      subtitle: Text(conversation.latest.message ?? '',
+                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                      trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (date != null)
+                              Text(
+                                  DateUtils.isSameDay(date, DateTime.now())
+                                      ? MaterialLocalizations.of(context)
+                                          .formatTimeOfDay(
+                                              TimeOfDay.fromDateTime(date))
+                                      : MaterialLocalizations.of(context)
+                                          .formatShortDate(date),
+                                  style:
+                                      Theme.of(context).textTheme.labelSmall),
+                            if (unread) ...[
+                              const SizedBox(height: 8),
+                              CircleAvatar(
+                                  radius: 4, backgroundColor: colors.primary)
+                            ],
+                          ]),
+                      onTap: () => _open(conversation),
+                    ),
+                  );
+                },
+              ),
+            )),
+          ])),
         );
       },
     );

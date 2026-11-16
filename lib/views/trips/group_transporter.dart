@@ -1,3 +1,5 @@
+import 'package:kapame/theme/clear_blue.dart';
+import 'package:kapame/widgets/clear_blue_widgets.dart';
 import 'package:kapame/widgets/location_address_text.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -232,277 +234,272 @@ class _GroupTransporterState extends State<GroupTransporter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: currentLocation == null
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
-                // Google Map container
-                Container(
-                  margin: const EdgeInsets.only(top: 24),
-                  height: MediaQuery.of(context).size.height * 0.95,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: GoogleMap(
-                      initialCameraPosition: CameraPosition(
-                        target: LatLng(currentLocation!.latitude!,
-                            currentLocation!.longitude!),
-                        zoom: 15,
-                      ),
-                      onMapCreated: (GoogleMapController controller) {
-                        mapController = controller;
-                      },
-                      markers: markers,
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: true,
-                    ),
-                  ),
-                ),
-                // Your custom info window overlay
-                if (_showCustomWindow && _selectedTrip != null)
-                  Positioned(
-                    bottom: 100, // Adjust the position as needed
-                    left: 20,
-                    right: 20,
-                    child: CustomInfoWindow(
-                      title:
-                          "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress}" ??
-                              'No address',
-                      snippet:
-                          "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress}" ??
-                              'No address',
-                      onClick: () => Navigator.pushNamed(
-                        context,
-                        '/viewrequest',
-                        arguments: _selectedTrip,
-                      ),
-                      onClose: () {
-                        setState(() {
-                          _showCustomWindow = false;
-                        });
-                      },
-                    ),
-                  ),
-                // Other widget overlays (e.g. filter button)
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  child: FloatingActionButton(
-                    backgroundColor: Colors.blue[200],
-                    foregroundColor: Colors.white,
-                    onPressed: () {
-                      showModalBottomSheet<void>(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 40,
-                                horizontal: 25,
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(title: const Text('Group transporter')),
+      body: SafeArea(
+          top: false,
+          child: Column(children: [
+            Expanded(
+                child: currentLocation == null
+                    ? const Center(child: Text('Waiting for your location…'))
+                    : Stack(fit: StackFit.expand, children: [
+                        GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(currentLocation!.latitude!,
+                                currentLocation!.longitude!),
+                            zoom: 15,
+                          ),
+                          onMapCreated: (GoogleMapController controller) {
+                            mapController = controller;
+                          },
+                          markers: markers,
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: true,
+                        ),
+                        if (_showCustomWindow && _selectedTrip != null)
+                          Positioned(
+                            bottom: 16,
+                            left: 20,
+                            right: 20,
+                            child: CustomInfoWindow(
+                              title:
+                                  "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress}" ??
+                                      'No address',
+                              snippet:
+                                  "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress}" ??
+                                      'No address',
+                              onClick: () => Navigator.pushNamed(
+                                context,
+                                '/viewrequest',
+                                arguments: _selectedTrip,
                               ),
-                              child: Column(
-                                children: [
-                                  const Text(
-                                    'Group Transporter Filter',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Form(
-                                    key: _formKey,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        OutlinedButton(
-                                          onPressed: () async {
-                                            final result =
-                                                await Navigator.pushNamed(
-                                                        context, '/pickup')
-                                                    as TripLocationInfo?;
-                                            if (result != null) {
-                                              setState(() {
-                                                pickUpController.text =
-                                                    result.pickUpAddress ?? '';
-                                                pickUpLat =
-                                                    result.pickUpLatitude;
-                                                pickUpLong =
-                                                    result.pickUpLongitude;
-                                              });
-                                            }
-                                          },
-                                          style: const ButtonStyle(
-                                            padding: WidgetStatePropertyAll(
-                                              EdgeInsets.symmetric(
-                                                vertical: 10,
-                                                horizontal: 15,
-                                              ),
-                                            ),
-                                            foregroundColor:
-                                                WidgetStatePropertyAll(
-                                              Color.fromARGB(255, 82, 82, 82),
-                                            ),
-                                            shape: WidgetStatePropertyAll(
-                                              RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                  Radius.circular(10),
-                                                ),
-                                              ),
-                                            ),
-                                            minimumSize: WidgetStatePropertyAll(
-                                              Size(double.infinity, 60),
-                                            ),
-                                          ),
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: LocationAddressText(
-                                              controller: pickUpController,
-                                              style: TextStyle(
-                                                fontSize: 17,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        // Destination button
-                                        OutlinedButton(
-                                          onPressed: () async {
-                                            final result =
-                                                await Navigator.pushNamed(
-                                                        context, '/destination')
-                                                    as TripLocationInfo?;
-                                            if (result != null) {
-                                              setState(() {
-                                                destinationController.text =
-                                                    result.destinationAddress ??
-                                                        '';
-                                                destLat =
-                                                    result.destinationLatitude;
-                                                destLong =
-                                                    result.destinationLongitude;
-                                              });
-                                            }
-                                          },
-                                          style: const ButtonStyle(
-                                            padding: WidgetStatePropertyAll(
-                                              EdgeInsets.symmetric(
-                                                vertical: 10,
-                                                horizontal: 15,
-                                              ),
-                                            ),
-                                            foregroundColor:
-                                                WidgetStatePropertyAll(
-                                              Color.fromARGB(255, 82, 82, 82),
-                                            ),
-                                            shape: WidgetStatePropertyAll(
-                                              RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                  Radius.circular(10),
-                                                ),
-                                              ),
-                                            ),
-                                            minimumSize: WidgetStatePropertyAll(
-                                              Size(double.infinity, 60),
-                                            ),
-                                          ),
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: LocationAddressText(
-                                              controller: destinationController,
-                                              style: TextStyle(
-                                                fontSize: 17,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        TextFormField(
-                                          controller: numberOfPeopleController,
-                                          decoration: const InputDecoration(
-                                            hintText: 'Number of People',
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide(width: 1),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10)),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.lightBlue,
-                                                  width: 1),
-                                            ),
-                                          ),
-                                          validator: (String? value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return 'Please enter some text';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                        const SizedBox(height: 10),
-                                        TextFormField(
-                                          controller: _dateController,
-                                          decoration: const InputDecoration(
-                                            labelText: 'Select a date',
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide(width: 1),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10)),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.lightBlue,
-                                                  width: 1),
-                                            ),
-                                          ),
-                                          readOnly: true,
-                                          onTap: () => selectDate(context),
-                                          validator: (value) =>
-                                              value == null || value.isEmpty
-                                                  ? 'Please select a date'
-                                                  : null,
-                                        ),
-                                        const SizedBox(height: 40),
-                                        FilledButton(
-                                          onPressed: _applyFilters,
-                                          style: const ButtonStyle(
-                                            shape: WidgetStatePropertyAll(
-                                              RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                              ),
-                                            ),
-                                            minimumSize: WidgetStatePropertyAll(
-                                                Size(double.infinity, 60)),
-                                            backgroundColor:
-                                                WidgetStatePropertyAll(
-                                                    Color.fromARGB(
-                                                        255, 241, 144, 47)),
-                                          ),
-                                          child: isLoading
-                                              ? const CircularProgressIndicator(
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                          Color>(Colors.white),
-                                                )
-                                              : const Text("Update Filters"),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              onClose: () {
+                                setState(() {
+                                  _showCustomWindow = false;
+                                });
+                              },
                             ),
-                          );
-                        },
-                      );
-                    },
-                    child: const Icon(Icons.filter_alt),
-                  ),
-                )
-              ],
+                          ),
+                      ])),
+            MapActionPanel(
+              offering: true,
+              title: 'Nearby requests',
+              subtitle: 'Explore requests on the map and filter your route.',
+              action: 'Filter requests',
+              onPressed: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  useSafeArea: true,
+                  builder: (BuildContext context) {
+                    return FractionallySizedBox(
+                        heightFactor: 0.85,
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.only(
+                              bottom: MediaQuery.viewInsetsOf(context).bottom),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 24,
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'Group Transporter Filter',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          final result =
+                                              await Navigator.pushNamed(
+                                                      context, '/pickup')
+                                                  as TripLocationInfo?;
+                                          if (result != null) {
+                                            setState(() {
+                                              pickUpController.text =
+                                                  result.pickUpAddress ?? '';
+                                              pickUpLat = result.pickUpLatitude;
+                                              pickUpLong =
+                                                  result.pickUpLongitude;
+                                            });
+                                          }
+                                        },
+                                        style: const ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                              vertical: 10,
+                                              horizontal: 15,
+                                            ),
+                                          ),
+                                          foregroundColor:
+                                              WidgetStatePropertyAll(
+                                            ClearBlue.ink,
+                                          ),
+                                          shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(20),
+                                              ),
+                                            ),
+                                          ),
+                                          minimumSize: WidgetStatePropertyAll(
+                                            Size(double.infinity, 60),
+                                          ),
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: LocationAddressText(
+                                            controller: pickUpController,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      // Destination button
+                                      OutlinedButton(
+                                        onPressed: () async {
+                                          final result =
+                                              await Navigator.pushNamed(
+                                                      context, '/destination')
+                                                  as TripLocationInfo?;
+                                          if (result != null) {
+                                            setState(() {
+                                              destinationController.text =
+                                                  result.destinationAddress ??
+                                                      '';
+                                              destLat =
+                                                  result.destinationLatitude;
+                                              destLong =
+                                                  result.destinationLongitude;
+                                            });
+                                          }
+                                        },
+                                        style: const ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                              vertical: 10,
+                                              horizontal: 15,
+                                            ),
+                                          ),
+                                          foregroundColor:
+                                              WidgetStatePropertyAll(
+                                            ClearBlue.ink,
+                                          ),
+                                          shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(20),
+                                              ),
+                                            ),
+                                          ),
+                                          minimumSize: WidgetStatePropertyAll(
+                                            Size(double.infinity, 60),
+                                          ),
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: LocationAddressText(
+                                            controller: destinationController,
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      TextFormField(
+                                        controller: numberOfPeopleController,
+                                        decoration: const InputDecoration(
+                                          hintText: 'Number of People',
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide(width: 1),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(20)),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: ClearBlue.accent,
+                                                width: 1),
+                                          ),
+                                        ),
+                                        validator: (String? value) {
+                                          if (value == null || value.isEmpty) {
+                                            return 'Please enter some text';
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                      const SizedBox(height: 10),
+                                      TextFormField(
+                                        controller: _dateController,
+                                        decoration: const InputDecoration(
+                                          labelText: 'Select a date',
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide(width: 1),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(20)),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: ClearBlue.accent,
+                                                width: 1),
+                                          ),
+                                        ),
+                                        readOnly: true,
+                                        onTap: () => selectDate(context),
+                                        validator: (value) =>
+                                            value == null || value.isEmpty
+                                                ? 'Please select a date'
+                                                : null,
+                                      ),
+                                      const SizedBox(height: 40),
+                                      FilledButton(
+                                        onPressed: _applyFilters,
+                                        style: const ButtonStyle(
+                                          shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(20)),
+                                            ),
+                                          ),
+                                          minimumSize: WidgetStatePropertyAll(
+                                              Size(double.infinity, 60)),
+                                          backgroundColor:
+                                              WidgetStatePropertyAll(
+                                                  ClearBlue.accent),
+                                        ),
+                                        child: isLoading
+                                            ? const CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white),
+                                              )
+                                            : const Text("Update Filters"),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ));
+                  },
+                );
+              },
             ),
+          ])),
       bottomNavigationBar: isAdLoaded && _bannerAd != null
           ? SafeArea(
               child: Container(

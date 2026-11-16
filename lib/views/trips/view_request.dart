@@ -1,3 +1,5 @@
+import 'package:kapame/theme/clear_blue.dart';
+import 'package:kapame/widgets/clear_blue_widgets.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -37,7 +39,7 @@ class _ViewRequestState extends State<ViewRequest> {
       polylines = {
         Polyline(
           polylineId: PolylineId('route'),
-          color: Colors.blue,
+          color: ClearBlue.accent,
           width: 5,
           points: polylinePoints
               .map((e) => LatLng(e.latitude, e.longitude))
@@ -133,12 +135,13 @@ class _ViewRequestState extends State<ViewRequest> {
         Marker(
           markerId: const MarkerId('destination'),
           position: LatLng(destLat, destLng),
-          infoWindow: const InfoWindow(title: 'Current Location'),
+          infoWindow: const InfoWindow(title: 'Destination'),
         ),
       );
     }
 
     return Scaffold(
+      appBar: AppBar(title: const Text('Your trip')),
       body: currentTrip == null
           ? const Center(child: Text('No trip data'))
           : Column(
@@ -170,6 +173,28 @@ class _ViewRequestState extends State<ViewRequest> {
                     ],
                   ),
                 ),
+                Flexible(
+                    child: SingleChildScrollView(
+                        child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: const BoxDecoration(
+                      color: ClearBlue.panel,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20))),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Your trip, mapped.',
+                            style: ClearBlue.subheading),
+                        const SizedBox(height: 8),
+                        Text(
+                            '${currentTrip?.tripType ?? 'Journey'} · ${currentTrip?.tripStatus ?? 'Status unavailable'}',
+                            style: ClearBlue.label),
+                        const SizedBox(height: 12),
+                        RouteSummary(location: currentTrip?.tripLocationInfo),
+                      ]),
+                ))),
               ],
             ),
       bottomNavigationBar: isAdLoaded && _bannerAd != null

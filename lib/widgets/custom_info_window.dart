@@ -1,4 +1,4 @@
-import 'dart:ffi';
+import 'package:kapame/theme/clear_blue.dart';
 
 import 'package:flutter/material.dart';
 
@@ -9,22 +9,22 @@ class CustomInfoWindow extends StatelessWidget {
   final VoidCallback onClose;
 
   const CustomInfoWindow({
-    Key? key,
+    super.key,
     required this.title,
     required this.snippet,
     required this.onClick,
     required this.onClose,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
       ),
-      elevation: 8,
+      elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -48,14 +48,14 @@ class CustomInfoWindow extends StatelessWidget {
                   onPressed: onClose,
                   child: const Text(
                     "Close",
-                    style: TextStyle(color: Colors.orange),
+                    style: TextStyle(color: ClearBlue.muted),
                   ),
                 ),
                 TextButton(
                   onPressed: onClick,
                   child: const Text(
                     "More Details",
-                    style: TextStyle(color: Colors.blue),
+                    style: TextStyle(color: ClearBlue.accent),
                   ),
                 ),
               ],
