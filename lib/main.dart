@@ -1,3 +1,4 @@
+import 'package:kapame/theme/clear_blue.dart';
 //libraries
 import 'package:flutter/material.dart';
 import 'package:kapame/services/current_user.dart';
@@ -72,10 +73,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'KapaMe Mobile',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade300),
-        useMaterial3: true,
-      ),
+      theme: ClearBlue.theme,
       initialRoute: '/',
       routes: {
         '/': (context) => const LandingPage(),

@@ -195,7 +195,7 @@ class _ChatState extends State<Chat> {
               margin: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: colors.primaryContainer.withValues(alpha: 0.4),
+                color: colors.primaryContainer,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(children: [
@@ -348,7 +348,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final foreground = isMine ? colors.onPrimaryContainer : colors.onSurface;
+    final foreground = isMine ? colors.onPrimary : colors.onSurface;
     final date = message.timestamp?.toLocal();
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
@@ -358,7 +358,7 @@ class _MessageBubble extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isMine ? colors.primaryContainer : colors.surfaceContainerLow,
+          color: isMine ? colors.primary : colors.surface,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),
