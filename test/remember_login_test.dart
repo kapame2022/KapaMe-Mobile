@@ -71,7 +71,8 @@ void main() {
 
       await tester.tap(find.text('Open settings'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Logout'));
+      await tester.scrollUntilVisible(find.text('Sign out'), 200);
+      await tester.tap(find.text('Sign out'));
       await tester.pumpAndSettle();
       expect(find.text('Signed out'), findsOneWidget);
       expect(auth.token, isNull);

@@ -42,3 +42,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local worktrees, review notes, and Android build reports
+.worktrees/
+.local-review/
+/android/build/
+# Accidental shell-output files
+/Failed
+/Get
+/Run
+/The
