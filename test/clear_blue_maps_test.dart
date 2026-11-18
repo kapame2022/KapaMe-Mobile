@@ -55,6 +55,7 @@ void main() {
             routes: {entry.$1: (_) => entry.$2}));
         await tester.pumpAndSettle();
         expect(find.byType(MapActionPanel), findsOneWidget);
+        expect(find.byType(ChoiceChip), findsNothing);
         await tester.ensureVisible(
             find.text(entry.$3 ? 'Filter requests' : 'Plan your journey'));
         await tester

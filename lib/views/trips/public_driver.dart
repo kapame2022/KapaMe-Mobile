@@ -249,7 +249,6 @@ class _PublicDriverState extends State<PublicDriver> {
                           ),
                       ])),
             MapActionPanel(
-              offering: true,
               title: 'Nearby requests',
               subtitle: 'Explore requests on the map and filter your route.',
               action: 'Filter requests',
