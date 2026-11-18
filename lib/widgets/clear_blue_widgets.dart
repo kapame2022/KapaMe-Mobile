@@ -251,9 +251,7 @@ class MapActionPanel extends StatelessWidget {
       required this.title,
       required this.subtitle,
       required this.action,
-      required this.onPressed,
-      this.offering = false});
-  final bool offering;
+      required this.onPressed});
   final String title, subtitle, action;
   final VoidCallback onPressed;
   @override
@@ -276,58 +274,6 @@ class MapActionPanel extends StatelessWidget {
                       Text(subtitle,
                           style: const TextStyle(
                               color: ClearBlue.muted, fontSize: 12)),
-                      const SizedBox(height: 16),
-                      SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(children: [
-                            for (final service in [
-                              (
-                                'car',
-                                'Private',
-                                offering ? '/privatedriver' : '/privatecommuter'
-                              ),
-                              (
-                                'bus',
-                                'Public',
-                                offering ? '/publicdriver' : '/publiccommuter'
-                              ),
-                              (
-                                'people',
-                                'Group',
-                                offering
-                                    ? '/grouptransporter'
-                                    : '/grouptransport'
-                              ),
-                              (
-                                'package',
-                                'Item',
-                                offering ? '/itemtransporter' : '/itemtransport'
-                              ),
-                            ])
-                              Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ChoiceChip(
-                                    avatar: DesignIcon('map_${service.$1}'),
-                                    label: Text(service.$2),
-                                    showCheckmark: false,
-                                    selected:
-                                        ModalRoute.of(context)?.settings.name ==
-                                            service.$3,
-                                    selectedColor: ClearBlue.soft,
-                                    backgroundColor: ClearBlue.panel,
-                                    side:
-                                        const BorderSide(color: ClearBlue.line),
-                                    onSelected: (_) {
-                                      if (ModalRoute.of(context)
-                                              ?.settings
-                                              .name !=
-                                          service.$3) {
-                                        Navigator.pushReplacementNamed(
-                                            context, service.$3);
-                                      }
-                                    },
-                                  )),
-                          ])),
                       const SizedBox(height: 16),
                       FilledButton(onPressed: onPressed, child: Text(action)),
                     ]),
