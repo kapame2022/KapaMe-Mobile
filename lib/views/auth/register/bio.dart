@@ -2,87 +2,65 @@ import 'package:flutter/material.dart';
 import 'package:kapame/services/new_user.dart';
 import 'package:provider/provider.dart';
 
-class Bio extends StatefulWidget {
+class Bio extends StatelessWidget {
   const Bio({super.key});
 
   @override
-  State<Bio> createState() => _BioState();
-}
-
-class _BioState extends State<Bio> {
-  DateTime selectedDate = DateTime.now();
-
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != selectedDate) {
-      Provider.of<UserState>(context, listen: false).updateDateOfBirth(picked);
-
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    String selectedGender = Provider.of<UserState>(context).gender;
-    DateTime userDateOfBirth = Provider.of<UserState>(context).dateOfBirth;
-    return Column(
-      children: [
-        const SizedBox(height: 30),
-        FilledButton(
-          onPressed: () => _selectDate(context),
-          style: ButtonStyle(
-            shape: const WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-            ),
-            minimumSize: const WidgetStatePropertyAll(
-              Size(double.infinity, 60),
-            ),
-            backgroundColor: WidgetStatePropertyAll(Colors.grey.shade200),
-          ),
-          child: Text(
-            '${userDateOfBirth.day}/${userDateOfBirth.month}/${userDateOfBirth.year}',
-            style: const TextStyle(color: Colors.black),
-          ),
+    final user = context.watch<UserState>();
+    final selectedGender =
+        ['Male', 'Female', 'Other'].contains(user.gender) ? user.gender : null;
+    final date = user.hasSelectedDateOfBirth
+        ? MaterialLocalizations.of(context).formatMediumDate(user.dateOfBirth)
+        : '';
+    return Column(children: [
+      TextFormField(
+        key: ValueKey(date),
+        initialValue: date,
+        readOnly: true,
+        decoration: const InputDecoration(
+          constraints: BoxConstraints(minHeight: 72),
+          labelText: 'Date of birth',
+          hintText: 'Select date of birth',
+          floatingLabelStyle: TextStyle(fontSize: 16),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          suffixIcon: Icon(Icons.calendar_today_outlined),
         ),
-        const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          child: DropdownButtonFormField<String>(
-            hint: const Text('Select gender'),
-            initialValue: selectedGender,
-            onChanged: (String? newValue) {
-              Provider.of<UserState>(context, listen: false)
-                  .updateGender(newValue ?? '');
-            },
-            icon: const Icon(Icons.arrow_drop_down),
-            alignment: Alignment.center,
-            isExpanded: true,
-            items: <String>['Select gender', 'Male', 'Female', 'Other']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-          ),
-        ),
-        const SizedBox(height: 30)
-      ],
-    );
+        validator: (_) =>
+            user.hasSelectedDateOfBirth ? null : 'Select your date of birth',
+        onTap: () async {
+          final today = DateUtils.dateOnly(DateTime.now());
+          final saved = user.dateOfBirth;
+          final picked = await showDatePicker(
+            context: context,
+            helpText: 'Date of birth',
+            initialDate: user.hasSelectedDateOfBirth && !saved.isAfter(today)
+                ? saved
+                : today,
+            firstDate: DateTime(1900),
+            lastDate: today,
+          );
+          if (picked != null && context.mounted) user.updateDateOfBirth(picked);
+        },
+      ),
+      const SizedBox(height: 16),
+      DropdownButtonFormField<String>(
+        initialValue: selectedGender,
+        isExpanded: true,
+        decoration: const InputDecoration(
+            constraints: BoxConstraints(minHeight: 72),
+            labelText: 'Gender',
+            floatingLabelStyle: TextStyle(fontSize: 16),
+            floatingLabelBehavior: FloatingLabelBehavior.always),
+        hint: const Text('Select gender'),
+        items: const ['Male', 'Female', 'Other']
+            .map((value) => DropdownMenuItem(value: value, child: Text(value)))
+            .toList(),
+        onChanged: (value) {
+          if (value != null) user.updateGender(value);
+        },
+        validator: (value) => value == null ? 'Select your gender' : null,
+      ),
+    ]);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:kapame/theme/clear_blue.dart';
 //import 'dart:js_interop';
 
 //import 'dart:js_interop';
@@ -28,16 +29,30 @@ class _RegisterState extends State<Register> {
     const Credentials(),
   ];
 
+  final _scroll = ScrollController();
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _resetScroll() {
+    FocusScope.of(context).unfocus();
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
+
   int _currentStep = 0;
   bool isLoading = false;
   bool isComplete = false;
 
   //Stepper Navigation
   void goToNextStep() {
+    if (isLoading || !(formKey.currentState?.validate() ?? false)) return;
     final newUser = Provider.of<UserState>(context, listen: false);
     if (_currentStep == 0 && !validateContactStep(newUser)) return;
     if (_currentStep == 1 && !validateBioStep(newUser)) return;
     if (_currentStep == 2 && !validateCredentialsStep(newUser)) return;
+    _resetScroll();
     setState(() {
       if (_currentStep <= 2) {
         _currentStep += 1;
@@ -46,6 +61,7 @@ class _RegisterState extends State<Register> {
   }
 
   void goToPreviousStep() {
+    _resetScroll();
     setState(() {
       if (_currentStep > 0) {
         _currentStep -= 1;
@@ -55,67 +71,28 @@ class _RegisterState extends State<Register> {
     });
   }
 
-  Widget currentButton() {
-    final newUser = Provider.of<UserState>(context);
-    bool formComplete = newUser.fullName.isNotEmpty &&
-        newUser.email.isNotEmpty &&
-        newUser.phoneNumber.isNotEmpty &&
-        newUser.gender != 'Select gender' &&
-        newUser.password.isNotEmpty &&
-        newUser.confirmPassword.isNotEmpty &&
-        newUser.password == newUser.confirmPassword;
-        
-    Color buttonColor = formComplete 
-        ? Colors.green 
-        : const Color.fromARGB(255, 72, 72, 72);
-
-    if (_currentStep <= 1) {
-      return FilledButton(
-        onPressed: goToNextStep,
-        style: ButtonStyle(
-          shape: const WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-          ),
-          minimumSize: const WidgetStatePropertyAll(
-            Size(double.infinity, 60),
-          ),
-          backgroundColor: WidgetStatePropertyAll(buttonColor),
-        ),
-        child: const Text("Continue"),
-      );
-    } else {
-      return FilledButton(
-        onPressed: () async {
-          await registerUser(context);
-        },
-        style: ButtonStyle(
-          shape: const WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-          ),
-          minimumSize: const WidgetStatePropertyAll(
-            Size(double.infinity, 60),
-          ),
-          backgroundColor: WidgetStatePropertyAll(buttonColor),
-        ),
+  Widget currentButton() => FilledButton(
+        onPressed: isLoading
+            ? null
+            : _currentStep < 2
+                ? goToNextStep
+                : () {
+                    if (formKey.currentState?.validate() ?? false) {
+                      registerUser(context);
+                    }
+                  },
         child: isLoading
-            ? const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-            : const Text("Finish"),
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2))
+            : Text(_currentStep < 2 ? 'Continue' : 'Create account'),
       );
-    }
-  }
 
   //Form Handling
   bool validateBioStep(UserState user) {
     List<String> errors = [];
+    if (!user.hasSelectedDateOfBirth) errors.add("Date of birth is required");
     if (user.gender.isEmpty || user.gender == 'Select gender') {
       errors.add("Gender is required");
     }
@@ -259,6 +236,11 @@ class _RegisterState extends State<Register> {
 
   Future registerUser(BuildContext context) async {
     final newUser = Provider.of<UserState>(context, listen: false);
+    if (isLoading ||
+        !validateBioStep(newUser) ||
+        !validateCredentialsStep(newUser)) {
+      return;
+    }
     try {
       if (validateUser(newUser)) {
         final Dio dio = Dio();
@@ -287,6 +269,7 @@ class _RegisterState extends State<Register> {
               'referral': null
             });
 
+        if (!context.mounted) return;
         if (res.statusCode == 200) {
           // AuthResponse currentUser = AuthResponse(
           //   res.data['message'],
@@ -298,9 +281,8 @@ class _RegisterState extends State<Register> {
           //     res.data['expireDate'],
           //   ),
           // );
-          print(res.data);
           Fluttertoast.showToast(
-            msg: "Trip Requested successfully!",
+            msg: "Account created. Please verify your email.",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM,
             timeInSecForIosWeb: 1,
@@ -317,8 +299,8 @@ class _RegisterState extends State<Register> {
         }
       }
     } catch (e) {
+      if (!mounted) return;
       if (e is DioException) {
-        print(e.response?.data);
         setState(() {
           Fluttertoast.showToast(
             msg: "Error submitting request. Please try again.",
@@ -332,43 +314,90 @@ class _RegisterState extends State<Register> {
           isLoading = false;
         });
       }
-      print('e: $e');
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
+    const headings = [
+      'Let’s get acquainted.',
+      'A little about you.',
+      'Keep your account safe.'
+    ];
+    const labels = ['CONTACT DETAILS', 'ABOUT YOU', 'SECURITY'];
+    const descriptions = [
+      'Your contact details, all in one place.',
+      'Add your personal details to continue.',
+      'Choose a password to finish signing up.'
+    ];
+    return PopScope(
+      canPop: _currentStep == 0 && !isLoading,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && !isLoading && _currentStep > 0) goToPreviousStep();
+      },
+      child: Scaffold(
         appBar: AppBar(
-          // Set the title of the appbar
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back), // Add a back button icon
-            onPressed: goToPreviousStep,
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Container(
-              width: screenWidth,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30),
-              child: Column(
-                children: [
-                  Image.asset('assets/images/KapaMeLogo.png'),
-                  Center(
-                    child: stepList[_currentStep],
-                  ),
-                  currentButton()
-                ],
-              ),
-            ),
-          ),
-        ));
+            title: const Text('Create account'),
+            leading: IconButton(
+                tooltip: 'Back',
+                icon: const Icon(Icons.arrow_back),
+                onPressed: isLoading ? null : goToPreviousStep)),
+        body: SafeArea(
+            child: SingleChildScrollView(
+                controller: _scroll,
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                    key: formKey,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Text('kapame.',
+                              style: TextStyle(
+                                  color: ClearBlue.accent,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 24),
+                          Text(
+                              '${labels[_currentStep]} · STEP ${_currentStep + 1} OF 3',
+                              style: ClearBlue.label),
+                          const SizedBox(height: 16),
+                          Row(
+                              children: List.generate(
+                                  3,
+                                  (i) => Expanded(
+                                      child: Padding(
+                                          padding: EdgeInsets.only(
+                                              right: i == 2 ? 0 : 8),
+                                          child: Container(
+                                              height: 4,
+                                              decoration: BoxDecoration(
+                                                  color: i <= _currentStep
+                                                      ? ClearBlue.accent
+                                                      : ClearBlue.line,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          4))))))),
+                          const SizedBox(height: 24),
+                          Text(headings[_currentStep],
+                              style: ClearBlue.heading),
+                          const SizedBox(height: 12),
+                          Text(descriptions[_currentStep],
+                              style: const TextStyle(color: ClearBlue.muted)),
+                          const SizedBox(height: 28),
+                          AbsorbPointer(
+                              absorbing: isLoading,
+                              child: stepList[_currentStep]),
+                          const SizedBox(height: 24),
+                          currentButton(),
+                        ])))),
+      ),
+    );
   }
 }
