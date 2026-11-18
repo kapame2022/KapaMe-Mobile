@@ -5,190 +5,106 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class Credentials extends StatefulWidget {
   const Credentials({super.key});
-
   @override
   State<Credentials> createState() => _CredentialsState();
 }
 
 class _CredentialsState extends State<Credentials> {
-  bool obscureText = true;
-  bool obscureText2 = true;
-  late TextEditingController passwordController;
-  late TextEditingController confirmPasswordController;
-
-  @override
-  void initState() {
-    super.initState();
-    passwordController = TextEditingController();
-    confirmPasswordController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  void checkFormCompletion() {
-    final newUser = Provider.of<UserState>(context, listen: false);
-    bool complete =
-        newUser.password.isNotEmpty && newUser.confirmPassword.isNotEmpty;
-
-    Provider.of<UserState>(context, listen: false).updateFormComplete(complete);
-  }
-
+  bool _hidePassword = true, _hideConfirmation = true;
   @override
   Widget build(BuildContext context) {
-    final newUser = Provider.of<UserState>(context, listen: false);
-
-    void showTermsAndConditions() {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Usage Policy'),
-            content: SfPdfViewer.asset("assets/Usage_Policy.pdf"),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Decline'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // Update user data in your state management solution
-                  // For example, using Provider:
-                  setState(() {
-                    Provider.of<UserState>(context, listen: false)
-                        .updateTermsAccepted(false);
-                  });
-                },
-              ),
-              TextButton(
-                child: const Text('Accept'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  // Update user data in your state management solution
-                  // For example, using Provider:
-                  setState(() {
-                    Provider.of<UserState>(context, listen: false)
-                        .updateTermsAccepted(true);
-                  });
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    return Column(
-      children: [
-        const SizedBox(height: 30),
-        TextFormField(
-          controller: passwordController,
-          onChanged: (value) {
-            newUser.updatePassword(value);
-            checkFormCompletion();
-          },
-          obscureText: obscureText,
+    final user = context.watch<UserState>();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      TextFormField(
+          initialValue: user.password,
+          onChanged: user.updatePassword,
+          obscureText: _hidePassword,
+          autocorrect: false,
+          enableSuggestions: false,
+          autofillHints: const [AutofillHints.newPassword],
           decoration: InputDecoration(
-            hintText: 'Password',
-            border: const OutlineInputBorder(
-              borderSide: BorderSide(width: 1),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.lightBlue, width: 1),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                obscureText ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: () {
-                setState(() {
-                  obscureText = !obscureText;
-                });
-              },
-            ),
-          ),
-          validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter some text';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
-          controller: confirmPasswordController,
-          onChanged: (value) {
-            newUser.updateConfirmPassword(value);
-            checkFormCompletion();
-          },
-          obscureText: obscureText2,
+              labelText: 'Password',
+              floatingLabelStyle: const TextStyle(fontSize: 16),
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              helperText: 'Use at least 8 characters.',
+              suffixIcon: IconButton(
+                  tooltip: _hidePassword ? 'Show password' : 'Hide password',
+                  onPressed: () =>
+                      setState(() => _hidePassword = !_hidePassword),
+                  icon: Icon(_hidePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined))),
+          validator: (value) =>
+              (value ?? '').length < 8 ? 'Use at least 8 characters' : null),
+      const SizedBox(height: 16),
+      TextFormField(
+          initialValue: user.confirmPassword,
+          onChanged: user.updateConfirmPassword,
+          obscureText: _hideConfirmation,
+          autocorrect: false,
+          enableSuggestions: false,
           decoration: InputDecoration(
-            hintText: 'Re-enter Password',
-            border: const OutlineInputBorder(
-              borderSide: BorderSide(width: 1),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.lightBlue, width: 1),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                obscureText2 ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: () {
-                setState(() {
-                  obscureText2 = !obscureText2;
-                });
-              },
-            ),
-          ),
-          validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter some text';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 10),
-        FilledButton(
-          style: const ButtonStyle(
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(10),
-                ),
-              ),
-            ),
-            minimumSize: WidgetStatePropertyAll(
-              Size(60, 60),
-            ),
-            backgroundColor: WidgetStatePropertyAll(
-              Color.fromARGB(255, 19, 161, 232),
-            ),
-          ),
-          onPressed: showTermsAndConditions,
-          child: const Text('Read Terms and Conditions'),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            Checkbox(
-              value: newUser.termsAccepted,
-              onChanged: (bool? value) {
-                setState(() {
-                  Provider.of<UserState>(context, listen: false)
-                      .updateTermsAccepted(value);
-                });
-              },
-            ),
-            const Text('I Accept the Terms and Conditions'),
-          ],
-        ),
-        const SizedBox(height: 10)
-      ],
-    );
+              labelText: 'Confirm password',
+              floatingLabelStyle: const TextStyle(fontSize: 16),
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              suffixIcon: IconButton(
+                  tooltip: _hideConfirmation
+                      ? 'Show confirmation'
+                      : 'Hide confirmation',
+                  onPressed: () =>
+                      setState(() => _hideConfirmation = !_hideConfirmation),
+                  icon: Icon(_hideConfirmation
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined))),
+          validator: (value) => value != user.password || (value ?? '').isEmpty
+              ? 'Passwords must match'
+              : null),
+      const SizedBox(height: 16),
+      TextButton(
+          onPressed: () => showDialog<void>(
+              context: context,
+              builder: (dialogContext) => AlertDialog(
+                    title: const Text('Terms and conditions'),
+                    content: SizedBox(
+                        width: double.maxFinite,
+                        height: MediaQuery.sizeOf(context).height * .5,
+                        child: SfPdfViewer.asset('assets/Usage_Policy.pdf')),
+                    actions: [
+                      TextButton(
+                          onPressed: () {
+                            user.updateTermsAccepted(false);
+                            Navigator.pop(dialogContext);
+                          },
+                          child: const Text('Decline')),
+                      FilledButton(
+                          onPressed: () {
+                            user.updateTermsAccepted(true);
+                            Navigator.pop(dialogContext);
+                          },
+                          child: const Text('Accept'))
+                    ],
+                  )),
+          child: const Text('Read terms and conditions')),
+      FormField<bool>(
+          validator: (_) => user.termsAccepted == true
+              ? null
+              : 'Accept the terms to create your account',
+          builder: (field) =>
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: const Text('I accept the terms and conditions.'),
+                    value: user.termsAccepted ?? false,
+                    onChanged: (value) {
+                      user.updateTermsAccepted(value);
+                      field.didChange(value);
+                    }),
+                if (field.hasError)
+                  Text(field.errorText!,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.error)),
+              ])),
+    ]);
   }
 }
