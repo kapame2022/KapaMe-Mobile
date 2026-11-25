@@ -55,10 +55,11 @@ void main() {
             routes: {entry.$1: (_) => entry.$2}));
         await tester.pumpAndSettle();
         expect(find.byType(MapActionPanel), findsOneWidget);
+        expect(find.byType(ChoiceChip), findsNothing);
         await tester.ensureVisible(
-            find.text(entry.$3 ? 'Filter requests' : 'Plan your journey'));
+            find.text(entry.$3 ? 'Filter requests' : 'Trip details'));
         await tester
-            .tap(find.text(entry.$3 ? 'Filter requests' : 'Plan your journey'));
+            .tap(find.text(entry.$3 ? 'Filter requests' : 'Trip details'));
         await tester.pumpAndSettle();
         expect(find.byType(Form), findsOneWidget);
         tester.view.viewInsets = FakeViewPadding(bottom: 220);

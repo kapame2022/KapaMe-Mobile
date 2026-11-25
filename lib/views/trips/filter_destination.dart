@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:kapame/widgets/trip_place_picker.dart';
 
-class FilterDestination extends StatefulWidget {
+class FilterDestination extends StatelessWidget {
   const FilterDestination({super.key});
 
   @override
-  State<FilterDestination> createState() => _FilterDestinationState();
-}
-
-class _FilterDestinationState extends State<FilterDestination> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
+  Widget build(BuildContext context) =>
+      const TripPlacePicker(destination: true, filter: true);
 }

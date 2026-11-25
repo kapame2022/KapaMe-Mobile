@@ -1,16 +1,16 @@
+import 'package:kapame/widgets/trip_route_map.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:kapame/services/trip_request_filter.dart';
 import 'package:provider/provider.dart';
 import 'package:kapame/theme/clear_blue.dart';
 import 'package:kapame/widgets/clear_blue_widgets.dart';
-import 'package:kapame/widgets/location_address_text.dart';
+import 'package:kapame/widgets/journey_place_button.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/ad_unit_ids.dart';
-import 'package:kapame/widgets/custom_info_window.dart';
 import 'package:location/location.dart';
 
 class PublicDriver extends StatefulWidget {
@@ -67,7 +67,6 @@ class _PublicDriverState extends State<PublicDriver> {
     _getLocation();
     _getTrips();
     loadAd();
-    destinationController.text = 'Destination';
   }
 
   @override
@@ -101,6 +100,7 @@ class _PublicDriverState extends State<PublicDriver> {
     }
 
     locationData = await location.getLocation();
+    if (!mounted) return;
     setState(() {
       currentLocation = locationData;
     });
@@ -170,33 +170,40 @@ class _PublicDriverState extends State<PublicDriver> {
     }
   }
 
-  bool _showCustomWindow = false;
   Trip? _selectedTrip;
 
   void _createMarkers(List<Trip> trips) {
     setState(() {
+      _selectedTrip = null;
       markers.clear();
       for (final trip in trips) {
-        markers.add(
-          Marker(
-            markerId: MarkerId(trip.tripId.toString()),
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              _getTripPriority(trip.tripPriority),
-            ),
-            onTap: () {
-              setState(() {
-                _showCustomWindow = true;
-                _selectedTrip = trip;
-              });
-            },
-            position: LatLng(
-              double.parse(trip.tripLocationInfo!.pickUpLatitude!),
-              double.parse(trip.tripLocationInfo!.pickUpLongitude!),
-            ),
-            infoWindow: const InfoWindow(title: '', snippet: ''),
-          ),
-        );
+        final location = trip.tripLocationInfo;
+        final position = tripCoordinates(
+                location?.pickUpLatitude, location?.pickUpLongitude) ??
+            tripCoordinates(
+                location?.destinationLatitude, location?.destinationLongitude);
+        final id = trip.tripId;
+        if (position == null || id == null || id.isEmpty) continue;
+        markers.add(Marker(
+          markerId: MarkerId(id),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              _getTripPriority(trip.tripPriority)),
+          position: position,
+          consumeTapEvents: true,
+          onTap: () => setState(() => _selectedTrip = trip),
+        ));
       }
+    });
+  }
+
+  Future<void> _chooseDestination() async {
+    final result = await Navigator.pushNamed<TripLocationInfo>(
+        context, '/filterdestination');
+    if (!mounted || result == null) return;
+    setState(() {
+      destinationController.text = result.destinationAddress ?? '';
+      destLat = result.destinationLatitude;
+      destLong = result.destinationLongitude;
     });
   }
 
@@ -225,33 +232,25 @@ class _PublicDriverState extends State<PublicDriver> {
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
                         ),
-                        if (_showCustomWindow && _selectedTrip != null)
-                          Positioned(
-                            bottom: 16,
-                            left: 20,
-                            right: 20,
-                            child: CustomInfoWindow(
-                              title:
-                                  "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress ?? 'No address'}",
-                              snippet:
-                                  "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress ?? 'No address'}",
-                              onClick: () => Navigator.pushNamed(
-                                context,
-                                '/viewrequest',
-                                arguments: _selectedTrip,
-                              ),
-                              onClose: () {
-                                setState(() {
-                                  _showCustomWindow = false;
-                                });
-                              },
-                            ),
-                          ),
                       ])),
             MapActionPanel(
-              offering: true,
               title: 'Nearby requests',
-              subtitle: 'Explore requests on the map and filter your route.',
+              subtitle: _selectedTrip == null
+                  ? 'Select a map pin to view a request.'
+                  : null,
+              locations: [
+                if (_selectedTrip case final trip?) ...[
+                  if (trip.requesterName?.trim().isNotEmpty == true)
+                    Text(trip.requesterName!, style: ClearBlue.label),
+                  RouteSummary(location: trip.tripLocationInfo),
+                  OutlinedButton(
+                    onPressed: () => Navigator.pushNamed(
+                        context, '/viewrequest',
+                        arguments: trip),
+                    child: const Text('View request'),
+                  ),
+                ],
+              ],
               action: 'Filter requests',
               onPressed: () {
                 showModalBottomSheet<void>(
@@ -272,10 +271,10 @@ class _PublicDriverState extends State<PublicDriver> {
                             child: Column(
                               children: [
                                 const Text(
-                                  'Public Commuter Filters',
+                                  'Filter by route',
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -285,56 +284,10 @@ class _PublicDriverState extends State<PublicDriver> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          final result =
-                                              await Navigator.pushNamed(
-                                                      context, '/destination')
-                                                  as TripLocationInfo?;
-                                          if (result != null) {
-                                            setState(() {
-                                              destinationController.text =
-                                                  result.destinationAddress ??
-                                                      '';
-                                              destLat =
-                                                  result.destinationLatitude;
-                                              destLong =
-                                                  result.destinationLongitude;
-                                            });
-                                          }
-                                        },
-                                        style: const ButtonStyle(
-                                          padding: WidgetStatePropertyAll(
-                                            EdgeInsets.symmetric(
-                                              vertical: 10,
-                                              horizontal: 15,
-                                            ),
-                                          ),
-                                          foregroundColor:
-                                              WidgetStatePropertyAll(
-                                            ClearBlue.ink,
-                                          ),
-                                          shape: WidgetStatePropertyAll(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(20),
-                                              ),
-                                            ),
-                                          ),
-                                          minimumSize: WidgetStatePropertyAll(
-                                            Size(double.infinity, 60),
-                                          ),
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: LocationAddressText(
-                                            controller: destinationController,
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      JourneyPlaceButton(
+                                          label: 'Destination area',
+                                          address: destinationController,
+                                          onPressed: _chooseDestination),
                                       const SizedBox(height: 40),
                                       FilledButton(
                                         onPressed: _applyFilters,
@@ -360,7 +313,7 @@ class _PublicDriverState extends State<PublicDriver> {
                                                     AlwaysStoppedAnimation<
                                                         Color>(Colors.white),
                                               )
-                                            : const Text("Apply Filters"),
+                                            : const Text("Update filters"),
                                       ),
                                     ],
                                   ),

@@ -1,12 +1,11 @@
 import 'package:kapame/theme/clear_blue.dart';
 import 'package:kapame/widgets/clear_blue_widgets.dart';
-import 'package:kapame/widgets/location_address_text.dart';
-import 'package:dio/dio.dart';
+import 'package:kapame/widgets/journey_place_button.dart';
+import 'package:kapame/views/trips/review_trip_request.dart';
+import 'package:kapame/widgets/trip_route_map.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/services/current_user.dart';
@@ -27,9 +26,6 @@ class _PublicCommuterState extends State<PublicCommuter> {
   TextEditingController destinationController = TextEditingController();
   String? destLat;
   String? destLong;
-
-  bool isLoading = false;
-  bool isComplete = false;
 
   BannerAd? _bannerAd;
   bool isAdLoaded = false;
@@ -62,7 +58,6 @@ class _PublicCommuterState extends State<PublicCommuter> {
     super.initState();
     _getLocation();
     loadAd();
-    destinationController.text = 'Destination';
   }
 
   @override
@@ -96,82 +91,97 @@ class _PublicCommuterState extends State<PublicCommuter> {
     }
 
     locationData = await location.getLocation();
+    if (!mounted) return;
     setState(() {
       currentLocation = locationData;
     });
   }
 
-  Future<void> handleSubmit() async {
-    try {
-      AppUser? authUser =
-          Provider.of<AuthUserState>(context, listen: false).appUser;
-      if (destinationController.text == '') {
-        print(destinationController.text);
-        setState(() {
-          isComplete = true;
-        });
-      } else {
-        final Dio dio = Dio();
+  bool _reviewOpen = false;
 
-        dio.options.connectTimeout = const Duration(seconds: 30);
-        dio.options.receiveTimeout = const Duration(seconds: 30);
-
-        setState(() {
-          isLoading = true;
-        });
-
-        final newTrip = {
-          'requester': authUser?.id,
-          'transporter': null,
-          'tripType': 'Public Commute',
-          'tripStatus': 'Requested',
-          'tripLocationInfo': {
-            'pickUpAddress': '',
-            'pickUpLatitude': '',
-            'pickUpLongitude': '',
-            'destinationAddress': destinationController.text,
-            'destinationLatitude': destLat,
-            'destinationLongitude': destLong
-          },
-          'contactDetailsPhoneNumber': '',
-          'contactDetailsEmail': '',
-          'tripPriority': '',
-          'tripScheduling': '',
-          'tripLastingTime': null,
-          'tripDateTime': null,
-          'groupTransport': null,
-          'itemTransport': null
-        };
-
-        await dio.post('https://kapameapi.azurewebsites.net/api/trips',
-            data: newTrip);
-        setState(() {
-          isLoading = false;
-        });
-
-        Fluttertoast.showToast(
-            msg: "Trip Requested successfully!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-            fontSize: 16.0);
-      }
-    } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error submitting request. Please try again.",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+  Future<void> _reviewRequest() async {
+    if (_reviewOpen || _formKey.currentState?.validate() != true) return;
+    if (destinationController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Choose the required locations before continuing.')),
+      );
+      return;
     }
+    final auth = context.read<AuthUserState>();
+    final userId = auth.appUser?.id;
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in to request a trip.')),
+      );
+      return;
+    }
+    final newTrip = {
+      'requester': userId,
+      'transporter': null,
+      'tripType': 'Public Commute',
+      'tripStatus': 'Requested',
+      'tripLocationInfo': {
+        'pickUpAddress': '',
+        'pickUpLatitude': '',
+        'pickUpLongitude': '',
+        'destinationAddress': destinationController.text,
+        'destinationLatitude': destLat,
+        'destinationLongitude': destLong
+      },
+      'contactDetailsPhoneNumber': '',
+      'contactDetailsEmail': '',
+      'tripPriority': '',
+      'tripScheduling': '',
+      'tripLastingTime': null,
+      'tripDateTime': null,
+      'groupTransport': null,
+      'itemTransport': null
+    };
+    _reviewOpen = true;
+    try {
+      await Navigator.push<void>(
+          context,
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                ReviewTripRequest(request: newTrip, token: auth.token),
+          ));
+    } finally {
+      _reviewOpen = false;
+    }
+  }
+
+  Future<void> _centerOnPlace(String? latitude, String? longitude) async {
+    final position = tripCoordinates(latitude, longitude);
+    if (position == null) return;
+    try {
+      await mapController?.animateCamera(CameraUpdate.newLatLng(position));
+    } catch (_) {
+      // A map can be disposed while a place is being selected.
+    }
+  }
+
+  Set<Marker> get _routeMarkers {
+    final destination = tripCoordinates(destLat, destLong);
+    return {
+      if (destination != null)
+        Marker(
+            markerId: const MarkerId('destination'),
+            position: destination,
+            infoWindow: const InfoWindow(title: 'Destination')),
+    };
+  }
+
+  Future<void> _chooseDestination() async {
+    final result =
+        await Navigator.pushNamed<TripLocationInfo>(context, '/destination');
+    if (!mounted || result == null) return;
+    setState(() {
+      destinationController.text = result.destinationAddress ?? '';
+      destLat = result.destinationLatitude;
+      destLong = result.destinationLongitude;
+    });
+    _centerOnPlace(destLat, destLong);
   }
 
   @override
@@ -197,15 +207,20 @@ class _PublicCommuterState extends State<PublicCommuter> {
                           onMapCreated: (GoogleMapController controller) {
                             mapController = controller;
                           },
+                          markers: _routeMarkers,
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
                         ),
                       ])),
             MapActionPanel(
-              title: 'Where are you headed?',
-              subtitle:
-                  'Public transport · Choose your pick-up and destination.',
-              action: 'Plan your journey',
+              title: 'Set your route',
+              action: 'Trip details',
+              locations: [
+                JourneyPlaceButton(
+                    label: 'Destination',
+                    address: destinationController,
+                    onPressed: _chooseDestination)
+              ],
               onPressed: () {
                 showModalBottomSheet<void>(
                   context: context,
@@ -225,10 +240,10 @@ class _PublicCommuterState extends State<PublicCommuter> {
                             child: Column(
                               children: [
                                 const Text(
-                                  'Public Commuter Request',
+                                  'Trip details',
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -238,61 +253,13 @@ class _PublicCommuterState extends State<PublicCommuter> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          // Navigate to the second page
-                                          final result =
-                                              await Navigator.pushNamed(
-                                                      context, '/destination')
-                                                  as TripLocationInfo?;
-
-                                          if (result != null) {
-                                            setState(() {
-                                              destinationController.text =
-                                                  result.destinationAddress ??
-                                                      '';
-                                              destLat =
-                                                  result.destinationLatitude;
-                                              destLong =
-                                                  result.destinationLongitude;
-                                            });
-                                          }
-                                        },
-                                        style: const ButtonStyle(
-                                          padding: WidgetStatePropertyAll(
-                                            EdgeInsets.symmetric(
-                                              vertical: 10,
-                                              horizontal: 15,
-                                            ),
-                                          ),
-                                          foregroundColor:
-                                              WidgetStatePropertyAll(
-                                            ClearBlue.ink,
-                                          ),
-                                          shape: WidgetStatePropertyAll(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(20),
-                                              ),
-                                            ),
-                                          ),
-                                          minimumSize: WidgetStatePropertyAll(
-                                            Size(double.infinity, 60),
-                                          ),
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: LocationAddressText(
-                                            controller: destinationController,
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      JourneyPlaceButton(
+                                          label: 'Destination',
+                                          address: destinationController,
+                                          onPressed: _chooseDestination),
                                       const SizedBox(height: 40),
                                       FilledButton(
-                                        onPressed: handleSubmit,
+                                        onPressed: _reviewRequest,
                                         style: const ButtonStyle(
                                           shape: WidgetStatePropertyAll(
                                             RoundedRectangleBorder(
@@ -309,13 +276,7 @@ class _PublicCommuterState extends State<PublicCommuter> {
                                             ClearBlue.accent,
                                           ),
                                         ),
-                                        child: isLoading
-                                            ? const CircularProgressIndicator(
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(Colors.white),
-                                              )
-                                            : const Text("Finish"),
+                                        child: const Text('Review request'),
                                       ),
                                     ],
                                   ),
