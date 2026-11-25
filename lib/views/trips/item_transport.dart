@@ -1,13 +1,12 @@
 import 'package:kapame/widgets/trip_date_time_picker.dart';
 import 'package:kapame/theme/clear_blue.dart';
 import 'package:kapame/widgets/clear_blue_widgets.dart';
-import 'package:kapame/widgets/location_address_text.dart';
-import 'package:dio/dio.dart';
+import 'package:kapame/widgets/journey_place_button.dart';
+import 'package:kapame/views/trips/review_trip_request.dart';
+import 'package:kapame/widgets/trip_route_map.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/ad_unit_ids.dart';
 import 'package:kapame/services/current_user.dart';
@@ -49,8 +48,6 @@ class _ItemTransportState extends State<ItemTransport> {
   String? pickUpLong;
   String? destLat;
   String? destLong;
-  bool isLoading = false;
-  bool isComplete = false;
   DateTime? tripDateTime;
   TextEditingController tripDateTimeController = TextEditingController();
   Future<void> selectDate(BuildContext context) async {
@@ -100,6 +97,7 @@ class _ItemTransportState extends State<ItemTransport> {
     phoneNumberController.dispose();
     emailController.dispose();
     tripPriorityController.dispose();
+    tripScheduleController.dispose();
     tripDateTimeController.dispose();
     _bannerAd?.dispose();
     super.dispose();
@@ -110,94 +108,120 @@ class _ItemTransportState extends State<ItemTransport> {
     super.initState();
     _getLocation();
     loadAd();
-    pickUpController.text = 'Pick Up';
-    destinationController.text = 'Destination';
   }
 
   Future<void> _getLocation() async {
     Location location = Location();
     LocationData locationData = await location.getLocation();
+    if (!mounted) return;
     setState(() {
       currentLocation = locationData;
     });
   }
 
-  Future<void> handleSubmit() async {
-    if (!_formKey.currentState!.validate()) {
-      Fluttertoast.showToast(
-        msg: "Please fill in all required fields correctly.",
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
+  bool _reviewOpen = false;
+
+  Future<void> _reviewRequest() async {
+    if (_reviewOpen || _formKey.currentState?.validate() != true) return;
+    if (destinationController.text.isEmpty || pickUpController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Choose the required locations before continuing.')),
       );
       return;
     }
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      AppUser? authUser =
-          Provider.of<AuthUserState>(context, listen: false).appUser;
-      if (authUser == null) {
-        throw Exception("User not authenticated");
-      }
-      final Dio dio = Dio();
-      dio.options.connectTimeout = const Duration(seconds: 30);
-      dio.options.receiveTimeout = const Duration(seconds: 30);
-      final newTrip = {
-        'requester': authUser.id,
-        'transporter': null,
-        'tripType': 'Item Transport',
-        'tripStatus': 'Requested',
-        'tripLocationInfo': {
-          'pickUpAddress': pickUpController.text,
-          'pickUpLatitude': pickUpLat,
-          'pickUpLongitude': pickUpLong,
-          'destinationAddress': destinationController.text,
-          'destinationLatitude': destLat,
-          'destinationLongitude': destLong
-        },
-        'contactDetailsPhoneNumber': phoneNumberController.text,
-        'contactDetailsEmail': '', // Consider adding an email field if needed
-        'tripPriority': tripPriorityController.text,
-        'tripScheduling': tripScheduleController.text,
-        'tripLastingTime': tripDateTimeController.text,
-        'tripDateTime': tripDateTime?.toLocal().toIso8601String(),
-        'groupTransport': null,
-        'itemTransport': {'description': itemDescriptionController.text}
-      };
-      final response = await dio.post(
-        'https://kapameapi.azurewebsites.net/api/trips',
-        data: newTrip,
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            // Add any necessary authentication headers here
-          },
-        ),
+    final auth = context.read<AuthUserState>();
+    final userId = auth.appUser?.id;
+    if (userId == null || userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sign in to request a trip.')),
       );
-      print('Response Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Fluttertoast.showToast(
-          msg: "Trip Requested successfully!",
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
-      } else {
-        throw Exception("Failed to create trip: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error submitting request: $e");
-      Fluttertoast.showToast(
-        msg: "Error submitting request. Please try again.",
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+      return;
     }
+    final newTrip = {
+      'requester': userId,
+      'transporter': null,
+      'tripType': 'Item Transport',
+      'tripStatus': 'Requested',
+      'tripLocationInfo': {
+        'pickUpAddress': pickUpController.text,
+        'pickUpLatitude': pickUpLat,
+        'pickUpLongitude': pickUpLong,
+        'destinationAddress': destinationController.text,
+        'destinationLatitude': destLat,
+        'destinationLongitude': destLong
+      },
+      'contactDetailsPhoneNumber': phoneNumberController.text,
+      'contactDetailsEmail': '', // Consider adding an email field if needed
+      'tripPriority': tripPriorityController.text,
+      'tripScheduling': tripScheduleController.text,
+      'tripLastingTime': tripDateTimeController.text,
+      'tripDateTime': tripDateTime?.toLocal().toIso8601String(),
+      'groupTransport': null,
+      'itemTransport': {'description': itemDescriptionController.text}
+    };
+    _reviewOpen = true;
+    try {
+      await Navigator.push<void>(
+          context,
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                ReviewTripRequest(request: newTrip, token: auth.token),
+          ));
+    } finally {
+      _reviewOpen = false;
+    }
+  }
+
+  Future<void> _centerOnPlace(String? latitude, String? longitude) async {
+    final position = tripCoordinates(latitude, longitude);
+    if (position == null) return;
+    try {
+      await mapController?.animateCamera(CameraUpdate.newLatLng(position));
+    } catch (_) {
+      // A map can be disposed while a place is being selected.
+    }
+  }
+
+  Set<Marker> get _routeMarkers {
+    final pickup = tripCoordinates(pickUpLat, pickUpLong);
+    final destination = tripCoordinates(destLat, destLong);
+    return {
+      if (pickup != null)
+        Marker(
+            markerId: const MarkerId('pickup'),
+            position: pickup,
+            infoWindow: const InfoWindow(title: 'Pick-up')),
+      if (destination != null)
+        Marker(
+            markerId: const MarkerId('destination'),
+            position: destination,
+            infoWindow: const InfoWindow(title: 'Destination')),
+    };
+  }
+
+  Future<void> _choosePickup() async {
+    final result =
+        await Navigator.pushNamed<TripLocationInfo>(context, '/pickup');
+    if (!mounted || result == null) return;
+    setState(() {
+      pickUpController.text = result.pickUpAddress ?? '';
+      pickUpLat = result.pickUpLatitude;
+      pickUpLong = result.pickUpLongitude;
+    });
+    _centerOnPlace(pickUpLat, pickUpLong);
+  }
+
+  Future<void> _chooseDestination() async {
+    final result =
+        await Navigator.pushNamed<TripLocationInfo>(context, '/destination');
+    if (!mounted || result == null) return;
+    setState(() {
+      destinationController.text = result.destinationAddress ?? '';
+      destLat = result.destinationLatitude;
+      destLong = result.destinationLongitude;
+    });
+    _centerOnPlace(destLat, destLong);
   }
 
   @override
@@ -221,14 +245,25 @@ class _ItemTransportState extends State<ItemTransport> {
                           onMapCreated: (GoogleMapController controller) {
                             mapController = controller;
                           },
+                          markers: _routeMarkers,
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
                         ),
                       ])),
             MapActionPanel(
-              title: 'Where are you headed?',
-              subtitle: 'Send an item · Choose your pick-up and destination.',
-              action: 'Plan your journey',
+              title: 'Set your route',
+              action: 'Trip details',
+              locations: [
+                JourneyPlaceButton(
+                    label: 'Pick-up',
+                    address: pickUpController,
+                    onPressed: _choosePickup),
+                const SizedBox(height: 8),
+                JourneyPlaceButton(
+                    label: 'Destination',
+                    address: destinationController,
+                    onPressed: _chooseDestination)
+              ],
               onPressed: () {
                 showModalBottomSheet<void>(
                   context: context,
@@ -262,117 +297,24 @@ class _ItemTransportState extends State<ItemTransport> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     // Pick-up Address Button
-                                    OutlinedButton(
-                                      onPressed: () async {
-                                        final result =
-                                            await Navigator.pushNamed(
-                                                    context, '/pickup')
-                                                as TripLocationInfo?;
-                                        if (result != null) {
-                                          setState(() {
-                                            pickUpController.text =
-                                                result.pickUpAddress ?? '';
-                                            pickUpLat = result.pickUpLatitude;
-                                            pickUpLong = result.pickUpLongitude;
-                                          });
-                                        }
-                                      },
-                                      style: const ButtonStyle(
-                                        padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(
-                                            vertical: 10,
-                                            horizontal: 15,
-                                          ),
-                                        ),
-                                        foregroundColor: WidgetStatePropertyAll(
-                                          ClearBlue.ink,
-                                        ),
-                                        shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(20),
-                                            ),
-                                          ),
-                                        ),
-                                        minimumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 60),
-                                        ),
-                                      ),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: LocationAddressText(
-                                          controller: pickUpController,
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    JourneyPlaceButton(
+                                        label: 'Pick-up',
+                                        address: pickUpController,
+                                        onPressed: _choosePickup),
                                     const SizedBox(height: 10),
                                     // Destination Button
-                                    OutlinedButton(
-                                      onPressed: () async {
-                                        final result =
-                                            await Navigator.pushNamed(
-                                                    context, '/destination')
-                                                as TripLocationInfo?;
-                                        if (result != null) {
-                                          setState(() {
-                                            destinationController.text =
-                                                result.destinationAddress ?? '';
-                                            destLat =
-                                                result.destinationLatitude;
-                                            destLong =
-                                                result.destinationLongitude;
-                                          });
-                                        }
-                                      },
-                                      style: const ButtonStyle(
-                                        padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(
-                                            vertical: 10,
-                                            horizontal: 15,
-                                          ),
-                                        ),
-                                        foregroundColor: WidgetStatePropertyAll(
-                                          ClearBlue.ink,
-                                        ),
-                                        shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.all(
-                                              Radius.circular(20),
-                                            ),
-                                          ),
-                                        ),
-                                        minimumSize: WidgetStatePropertyAll(
-                                          Size(double.infinity, 60),
-                                        ),
-                                      ),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: LocationAddressText(
-                                          controller: destinationController,
-                                          style: TextStyle(
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    JourneyPlaceButton(
+                                        label: 'Destination',
+                                        address: destinationController,
+                                        onPressed: _chooseDestination),
                                     const SizedBox(height: 10),
                                     // Phone Number Field
                                     TextFormField(
                                       controller: phoneNumberController,
                                       obscureText: false,
                                       decoration: const InputDecoration(
-                                          hintText: 'Phone Number',
-                                          border: OutlineInputBorder(
-                                              borderSide: BorderSide(width: 1),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(20))),
-                                          focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: ClearBlue.accent,
-                                                  width: 1))),
+                                        labelText: 'Phone number',
+                                      ),
                                       validator: (String? value) {
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter some text';
@@ -381,51 +323,25 @@ class _ItemTransportState extends State<ItemTransport> {
                                       },
                                     ),
                                     const SizedBox(height: 10),
-                                    // Item Description Field
                                     TextFormField(
                                       controller: itemDescriptionController,
                                       decoration: const InputDecoration(
-                                        hintText: 'Item Description',
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(width: 1),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(20),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              color: ClearBlue.accent,
-                                              width: 1),
-                                        ),
-                                      ),
-                                      validator: (String? value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter some text';
-                                        }
-                                        return null;
-                                      },
+                                          labelText: 'Item description'),
+                                      validator: (value) => value == null ||
+                                              value.trim().isEmpty
+                                          ? 'Enter a description of the item'
+                                          : null,
                                     ),
                                     const SizedBox(height: 10),
                                     // Trip Priority Dropdown
                                     DropdownButtonFormField<String>(
                                       isExpanded: true,
                                       decoration: const InputDecoration(
-                                        labelText: 'Select a trip priority',
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(width: 1),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(20),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: ClearBlue.accent,
-                                            width: 1,
-                                          ),
-                                        ),
+                                        labelText: 'Priority',
                                       ),
                                       initialValue: selectedPriority,
                                       onChanged: (String? newValue) {
+                                        selectedPriority = newValue;
                                         tripPriorityController.text =
                                             newValue.toString();
                                       },
@@ -445,22 +361,11 @@ class _ItemTransportState extends State<ItemTransport> {
                                     DropdownButtonFormField<String>(
                                       isExpanded: true,
                                       decoration: const InputDecoration(
-                                        labelText: 'Select a trip schedule',
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(width: 1),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(20),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: ClearBlue.accent,
-                                            width: 1,
-                                          ),
-                                        ),
+                                        labelText: 'Schedule',
                                       ),
                                       initialValue: selectedSchedule,
                                       onChanged: (String? newValue) {
+                                        selectedSchedule = newValue;
                                         tripScheduleController.text =
                                             newValue.toString();
                                       },
@@ -480,19 +385,9 @@ class _ItemTransportState extends State<ItemTransport> {
                                     TextFormField(
                                       controller: tripDateTimeController,
                                       decoration: const InputDecoration(
-                                        labelText: 'Select a date and time',
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide(width: 1),
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(20),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: ClearBlue.accent,
-                                            width: 1,
-                                          ),
-                                        ),
+                                        labelText: 'Departure',
+                                        suffixIcon:
+                                            Icon(Icons.calendar_today_outlined),
                                       ),
                                       readOnly: true,
                                       onTap: () => selectDate(context),
@@ -504,7 +399,7 @@ class _ItemTransportState extends State<ItemTransport> {
                                     const SizedBox(height: 40),
                                     // Submit Button
                                     FilledButton(
-                                      onPressed: handleSubmit,
+                                      onPressed: _reviewRequest,
                                       style: const ButtonStyle(
                                         shape: WidgetStatePropertyAll(
                                           RoundedRectangleBorder(
@@ -520,14 +415,7 @@ class _ItemTransportState extends State<ItemTransport> {
                                           ClearBlue.accent,
                                         ),
                                       ),
-                                      child: isLoading
-                                          ? const CircularProgressIndicator(
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                            )
-                                          : const Text("Finish"),
+                                      child: const Text('Review request'),
                                     ),
                                   ],
                                 ),

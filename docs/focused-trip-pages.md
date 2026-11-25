@@ -1,6 +1,6 @@
 # Focused trip pages
 
-Removed competing service choices from all eight selected trip pages. Service selection stays on Home; maps and existing booking forms remain.
+Service selection stays on Home. The selected map shows route controls for booking or the selected request for driving. Booking adds a review and confirmation screen, and trip details show the route, contact action and saved pick-up map.
 
 ## Review screens
 
@@ -8,9 +8,9 @@ Removed competing service choices from all eight selected trip pages. Service se
 
 ## Validation
 
-Full suite: 71 passed, 1 skipped before adding the opt-in capture test. Map and home tests: 20 passed. Screenshot capture passed.
+The Flutter suite checks all eight service pages and the booking review and retry flow. Screenshot capture passed.
 
-The screenshot shows a location-pending test fixture. Native map tiles, permissions and live booking still need a device smoke test. No Android APK build was run for this feature.
+The screenshot shows a location-pending test fixture. Native map tiles, permissions and live booking still need a device smoke test.
 
 Screenshots render production widgets with synthetic review data. Recreate them from this worktree:
 

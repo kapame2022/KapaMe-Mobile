@@ -1,17 +1,17 @@
+import 'package:kapame/widgets/trip_route_map.dart';
 import 'package:kapame/services/current_user.dart';
 import 'package:kapame/services/trip_request_filter.dart';
 import 'package:provider/provider.dart';
 import 'package:kapame/widgets/trip_date_time_picker.dart';
 import 'package:kapame/theme/clear_blue.dart';
 import 'package:kapame/widgets/clear_blue_widgets.dart';
-import 'package:kapame/widgets/location_address_text.dart';
+import 'package:kapame/widgets/journey_place_button.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/ad_unit_ids.dart';
-import 'package:kapame/widgets/custom_info_window.dart';
 import 'package:location/location.dart';
 
 class GroupTransporter extends StatefulWidget {
@@ -43,7 +43,6 @@ class _GroupTransporterState extends State<GroupTransporter> {
   String? destLat;
   String? destLong;
 
-  bool _showCustomWindow = false;
   Trip? _selectedTrip;
 
   BannerAd? _bannerAd;
@@ -78,8 +77,6 @@ class _GroupTransporterState extends State<GroupTransporter> {
     _getLocation();
     _getTrips();
     loadAd();
-    pickUpController.text = 'Pick Up';
-    destinationController.text = 'Destination';
   }
 
   @override
@@ -116,6 +113,7 @@ class _GroupTransporterState extends State<GroupTransporter> {
     }
 
     locationData = await location.getLocation();
+    if (!mounted) return;
     setState(() {
       currentLocation = locationData;
     });
@@ -212,28 +210,24 @@ class _GroupTransporterState extends State<GroupTransporter> {
 
   void _createMarkers(List<Trip> trips) {
     setState(() {
+      _selectedTrip = null;
       markers.clear();
       for (final trip in trips) {
-        markers.add(
-          Marker(
-            markerId: MarkerId(trip.tripId.toString()),
-            icon: BitmapDescriptor.defaultMarkerWithHue(
-              _getTripPriority(trip.tripPriority),
-            ),
-            onTap: () {
-              // Update the UI state to display your custom info window overlay.
-              setState(() {
-                _showCustomWindow = true;
-                _selectedTrip = trip;
-              });
-            },
-            position: LatLng(
-              double.parse(trip.tripLocationInfo!.pickUpLatitude!),
-              double.parse(trip.tripLocationInfo!.pickUpLongitude!),
-            ),
-            infoWindow: const InfoWindow(title: '', snippet: ''),
-          ),
-        );
+        final location = trip.tripLocationInfo;
+        final position = tripCoordinates(
+                location?.pickUpLatitude, location?.pickUpLongitude) ??
+            tripCoordinates(
+                location?.destinationLatitude, location?.destinationLongitude);
+        final id = trip.tripId;
+        if (position == null || id == null || id.isEmpty) continue;
+        markers.add(Marker(
+          markerId: MarkerId(id),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+              _getTripPriority(trip.tripPriority)),
+          position: position,
+          consumeTapEvents: true,
+          onTap: () => setState(() => _selectedTrip = trip),
+        ));
       }
     });
   }
@@ -248,6 +242,28 @@ class _GroupTransporterState extends State<GroupTransporter> {
     setState(() {
       tripDateTime = picked;
       _dateController.text = formatTripDateTime(picked);
+    });
+  }
+
+  Future<void> _choosePickup() async {
+    final result =
+        await Navigator.pushNamed<TripLocationInfo>(context, '/filterpickup');
+    if (!mounted || result == null) return;
+    setState(() {
+      pickUpController.text = result.pickUpAddress ?? '';
+      pickUpLat = result.pickUpLatitude;
+      pickUpLong = result.pickUpLongitude;
+    });
+  }
+
+  Future<void> _chooseDestination() async {
+    final result = await Navigator.pushNamed<TripLocationInfo>(
+        context, '/filterdestination');
+    if (!mounted || result == null) return;
+    setState(() {
+      destinationController.text = result.destinationAddress ?? '';
+      destLat = result.destinationLatitude;
+      destLong = result.destinationLongitude;
     });
   }
 
@@ -276,34 +292,25 @@ class _GroupTransporterState extends State<GroupTransporter> {
                           myLocationEnabled: true,
                           myLocationButtonEnabled: true,
                         ),
-                        if (_showCustomWindow && _selectedTrip != null)
-                          Positioned(
-                            bottom: 16,
-                            left: 20,
-                            right: 20,
-                            child: CustomInfoWindow(
-                              title:
-                                  "Pickup Address: ${_selectedTrip!.tripLocationInfo!.pickUpAddress}" ??
-                                      'No address',
-                              snippet:
-                                  "Destination Address: ${_selectedTrip!.tripLocationInfo!.destinationAddress}" ??
-                                      'No address',
-                              onClick: () => Navigator.pushNamed(
-                                context,
-                                '/viewrequest',
-                                arguments: _selectedTrip,
-                              ),
-                              onClose: () {
-                                setState(() {
-                                  _showCustomWindow = false;
-                                });
-                              },
-                            ),
-                          ),
                       ])),
             MapActionPanel(
               title: 'Nearby requests',
-              subtitle: 'Explore requests on the map and filter your route.',
+              subtitle: _selectedTrip == null
+                  ? 'Select a map pin to view a request.'
+                  : null,
+              locations: [
+                if (_selectedTrip case final trip?) ...[
+                  if (trip.requesterName?.trim().isNotEmpty == true)
+                    Text(trip.requesterName!, style: ClearBlue.label),
+                  RouteSummary(location: trip.tripLocationInfo),
+                  OutlinedButton(
+                    onPressed: () => Navigator.pushNamed(
+                        context, '/viewrequest',
+                        arguments: trip),
+                    child: const Text('View request'),
+                  ),
+                ],
+              ],
               action: 'Filter requests',
               onPressed: () {
                 showModalBottomSheet<void>(
@@ -324,10 +331,10 @@ class _GroupTransporterState extends State<GroupTransporter> {
                             child: Column(
                               children: [
                                 const Text(
-                                  'Group Transporter Filter',
+                                  'Filter by route',
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                                 const SizedBox(height: 20),
@@ -337,121 +344,21 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          final result =
-                                              await Navigator.pushNamed(
-                                                      context, '/pickup')
-                                                  as TripLocationInfo?;
-                                          if (result != null) {
-                                            setState(() {
-                                              pickUpController.text =
-                                                  result.pickUpAddress ?? '';
-                                              pickUpLat = result.pickUpLatitude;
-                                              pickUpLong =
-                                                  result.pickUpLongitude;
-                                            });
-                                          }
-                                        },
-                                        style: const ButtonStyle(
-                                          padding: WidgetStatePropertyAll(
-                                            EdgeInsets.symmetric(
-                                              vertical: 10,
-                                              horizontal: 15,
-                                            ),
-                                          ),
-                                          foregroundColor:
-                                              WidgetStatePropertyAll(
-                                            ClearBlue.ink,
-                                          ),
-                                          shape: WidgetStatePropertyAll(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(20),
-                                              ),
-                                            ),
-                                          ),
-                                          minimumSize: WidgetStatePropertyAll(
-                                            Size(double.infinity, 60),
-                                          ),
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: LocationAddressText(
-                                            controller: pickUpController,
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      JourneyPlaceButton(
+                                          label: 'Pick-up area',
+                                          address: pickUpController,
+                                          onPressed: _choosePickup),
                                       const SizedBox(height: 10),
                                       // Destination button
-                                      OutlinedButton(
-                                        onPressed: () async {
-                                          final result =
-                                              await Navigator.pushNamed(
-                                                      context, '/destination')
-                                                  as TripLocationInfo?;
-                                          if (result != null) {
-                                            setState(() {
-                                              destinationController.text =
-                                                  result.destinationAddress ??
-                                                      '';
-                                              destLat =
-                                                  result.destinationLatitude;
-                                              destLong =
-                                                  result.destinationLongitude;
-                                            });
-                                          }
-                                        },
-                                        style: const ButtonStyle(
-                                          padding: WidgetStatePropertyAll(
-                                            EdgeInsets.symmetric(
-                                              vertical: 10,
-                                              horizontal: 15,
-                                            ),
-                                          ),
-                                          foregroundColor:
-                                              WidgetStatePropertyAll(
-                                            ClearBlue.ink,
-                                          ),
-                                          shape: WidgetStatePropertyAll(
-                                            RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(20),
-                                              ),
-                                            ),
-                                          ),
-                                          minimumSize: WidgetStatePropertyAll(
-                                            Size(double.infinity, 60),
-                                          ),
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: LocationAddressText(
-                                            controller: destinationController,
-                                            style: TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      JourneyPlaceButton(
+                                          label: 'Destination area',
+                                          address: destinationController,
+                                          onPressed: _chooseDestination),
                                       const SizedBox(height: 10),
                                       TextFormField(
                                         controller: numberOfPeopleController,
                                         decoration: const InputDecoration(
-                                          hintText: 'Number of People',
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide(width: 1),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(20)),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: ClearBlue.accent,
-                                                width: 1),
-                                          ),
+                                          labelText: 'Passengers',
                                         ),
                                         validator: (String? value) {
                                           if (value == null || value.isEmpty) {
@@ -464,17 +371,9 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                       TextFormField(
                                         controller: _dateController,
                                         decoration: const InputDecoration(
-                                          labelText: 'Select a date and time',
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide(width: 1),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(20)),
-                                          ),
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: ClearBlue.accent,
-                                                width: 1),
-                                          ),
+                                          labelText: 'Departure',
+                                          suffixIcon: Icon(
+                                              Icons.calendar_today_outlined),
                                         ),
                                         readOnly: true,
                                         onTap: () => selectDate(context),
@@ -505,7 +404,7 @@ class _GroupTransporterState extends State<GroupTransporter> {
                                                     AlwaysStoppedAnimation<
                                                         Color>(Colors.white),
                                               )
-                                            : const Text("Update Filters"),
+                                            : const Text("Update filters"),
                                       ),
                                     ],
                                   ),

@@ -249,10 +249,13 @@ class MapActionPanel extends StatelessWidget {
   const MapActionPanel(
       {super.key,
       required this.title,
-      required this.subtitle,
+      this.subtitle,
+      this.locations = const [],
       required this.action,
       required this.onPressed});
-  final String title, subtitle, action;
+  final String title, action;
+  final String? subtitle;
+  final List<Widget> locations;
   final VoidCallback onPressed;
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -270,11 +273,17 @@ class MapActionPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(title, style: ClearBlue.subheading),
-                      const SizedBox(height: 6),
-                      Text(subtitle,
-                          style: const TextStyle(
-                              color: ClearBlue.muted, fontSize: 12)),
-                      const SizedBox(height: 16),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 6),
+                        Text(subtitle!,
+                            style: const TextStyle(
+                                color: ClearBlue.muted, fontSize: 12)),
+                      ],
+                      if (locations.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        ...locations,
+                      ],
+                      const SizedBox(height: 12),
                       FilledButton(onPressed: onPressed, child: Text(action)),
                     ]),
               ))));
