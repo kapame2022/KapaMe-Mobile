@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'package:kapame/services/owned_trips.dart';
 import 'package:flutter/material.dart';
 import 'package:kapame/models/trip.dart';
 import 'package:kapame/services/current_user.dart';
@@ -25,15 +25,7 @@ class _TripHistoryState extends State<TripHistory> {
   Future<List<Trip>> _load() async {
     if (widget.loadTrips != null) return widget.loadTrips!();
     final auth = context.read<AuthUserState>();
-    final response = await Dio().get(
-        'https://kapameapi.azurewebsites.net/api/trips',
-        options: Options(headers: {
-          if (auth.token?.isNotEmpty == true)
-            'Authorization': 'Bearer ${auth.token}'
-        }));
-    return (response.data as List)
-        .map((item) => Trip.fromMap(Map<String, dynamic>.from(item)))
-        .toList();
+    return loadOwnedTrips(userId: auth.appUser?.id, token: auth.token);
   }
 
   Future<void> _refresh() async {
@@ -62,9 +54,7 @@ class _TripHistoryState extends State<TripHistory> {
                   BrandHeader(
                       name: context.watch<AuthUserState>().appUser?.fullName),
                   const SizedBox(height: 16),
-                  const PageHeading(
-                      eyebrow: 'YOUR JOURNEYS',
-                      title: 'All your trips.\nOne place.'),
+                  const Text('Trips', style: ClearBlue.heading),
                   const SizedBox(height: 24),
                   JourneyTabs(
                       labels: const ['Upcoming', 'Past'],
@@ -92,28 +82,12 @@ class _TripHistoryState extends State<TripHistory> {
                         }
                         final now = DateTime.now();
                         final trips = (snapshot.data ?? <Trip>[]).where((trip) {
-                          if (userId == null || userId.isEmpty) return false;
-                          if (trip.requester?.toLowerCase() !=
-                                  userId.toLowerCase() &&
-                              trip.transporter?.toLowerCase() !=
-                                  userId.toLowerCase()) {
-                            return false;
-                          }
-                          final status = (trip.tripStatus ?? '').toLowerCase();
-                          final past = [
-                                'completed',
-                                'cancelled',
-                                'canceled',
-                                'expired'
-                              ].contains(status) ||
-                              (trip.tripDateTime?.isBefore(now) ?? false);
-                          return _tab == 1 ? past : !past;
+                          return tripBelongsTo(trip, userId) &&
+                              isPastTrip(trip, now) == (_tab == 1);
                         }).toList()
-                          ..sort((a, b) => _tab == 0
-                              ? (a.tripDateTime ?? now)
-                                  .compareTo(b.tripDateTime ?? now)
-                              : (b.tripDateTime ?? now)
-                                  .compareTo(a.tripDateTime ?? now));
+                          ..sort(_tab == 0
+                              ? compareUpcomingTrips
+                              : (a, b) => compareUpcomingTrips(b, a));
                         if (trips.isEmpty) {
                           return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 48),
@@ -133,14 +107,34 @@ class _TripHistoryState extends State<TripHistory> {
                               ]));
                         }
                         return Column(children: [
-                          for (final trip in trips)
+                          if (_tab == 0) ...[
+                            const Align(
+                              alignment: Alignment.centerLeft,
+                              child:
+                                  Text('Next up', style: ClearBlue.subheading),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                          for (final (index, trip) in trips.indexed) ...[
+                            if (_tab == 0 && index == 1) ...[
+                              const Align(
+                                alignment: Alignment.centerLeft,
+                                child:
+                                    Text('Later', style: ClearBlue.subheading),
+                              ),
+                              const SizedBox(height: 10),
+                            ],
                             Padding(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: TripSummaryCard(
-                                    trip: trip,
-                                    onTap: () => Navigator.pushNamed(
-                                        context, '/viewrequest',
-                                        arguments: trip)))
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: TripSummaryCard(
+                                trip: trip,
+                                featured: _tab == 0 && index == 0,
+                                onTap: () => Navigator.pushNamed(
+                                    context, '/viewrequest',
+                                    arguments: trip),
+                              ),
+                            ),
+                          ],
                         ]);
                       }),
                 ],
@@ -150,51 +144,77 @@ class _TripHistoryState extends State<TripHistory> {
 }
 
 class TripSummaryCard extends StatelessWidget {
-  const TripSummaryCard({super.key, required this.trip, this.onTap});
+  const TripSummaryCard({
+    super.key,
+    required this.trip,
+    this.onTap,
+    this.featured = false,
+  });
+
   final Trip trip;
   final VoidCallback? onTap;
+  final bool featured;
+
   @override
   Widget build(BuildContext context) {
     final date = trip.tripDateTime?.toLocal();
     final locale = MaterialLocalizations.of(context);
+    final departure = date == null
+        ? 'Departure not provided'
+        : '${locale.formatMediumDate(date)} · ${locale.formatTimeOfDay(TimeOfDay.fromDateTime(date))}';
+    final status = trip.tripStatus?.trim() ?? '';
+    final (background, foreground) = switch (status.toLowerCase()) {
+      'requested' || 'pending' => (
+          const Color(0xfffff0d8),
+          const Color(0xff704500)
+        ),
+      'completed' => (const Color(0xffe2f4ec), const Color(0xff1e5b43)),
+      'canceled' || 'cancelled' || 'expired' => (
+          const Color(0xfff3e9ea),
+          const Color(0xff853c46)
+        ),
+      _ => (ClearBlue.soft, ClearBlue.accent),
+    };
     return Card(
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-            onTap: onTap,
-            child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                          spacing: 12,
-                          runSpacing: 8,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                    color: ClearBlue.soft,
-                                    borderRadius: BorderRadius.circular(20)),
-                                child: Text(
-                                    trip.tripStatus ?? 'Status unavailable',
-                                    style: const TextStyle(
-                                        fontSize: 11,
-                                        color: ClearBlue.accent))),
-                            Text(trip.tripType ?? 'Journey',
-                                style: const TextStyle(
-                                    fontSize: 12, color: ClearBlue.muted))
-                          ]),
-                      const SizedBox(height: 8),
-                      RouteSummary(location: trip.tripLocationInfo),
-                      const Divider(height: 24),
-                      Text(
-                          date == null
-                              ? 'Departure not provided'
-                              : '${locale.formatMediumDate(date)} · ${locale.formatTimeOfDay(TimeOfDay.fromDateTime(date))}',
-                          style: const TextStyle(
-                              color: ClearBlue.muted, fontSize: 12)),
-                    ]))));
+      color: featured ? const Color(0xffebf5ff) : null,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 10,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(trip.tripType ?? 'Journey', style: ClearBlue.label),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                        color: background,
+                        borderRadius: BorderRadius.circular(20)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      child: Text(
+                          status.isEmpty ? 'Status unavailable' : status,
+                          style: TextStyle(fontSize: 12, color: foreground)),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(departure,
+                  style: TextStyle(
+                      fontSize: featured ? 18 : 14,
+                      fontWeight: FontWeight.w700)),
+              RouteSummary(location: trip.tripLocationInfo),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
