@@ -5,6 +5,7 @@ import 'package:kapame/main.dart';
 import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/auth_response.dart';
 import 'package:kapame/services/current_user.dart';
+import 'package:kapame/views/home/home.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -39,7 +40,8 @@ void main() {
       child: const MyApp(initialRoute: '/home'),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('HELLO, TEST'), findsOneWidget);
+    expect(find.byType(Home), findsOneWidget);
+    expect(find.text('TU'), findsOneWidget);
     expect(find.text('Log in'), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();

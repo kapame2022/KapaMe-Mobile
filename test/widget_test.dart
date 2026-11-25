@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:kapame/models/app_user.dart';
+import 'package:kapame/models/trip.dart';
+import 'package:kapame/services/current_user.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kapame/theme/clear_blue.dart';
 import 'package:kapame/views/home/home.dart';
@@ -43,6 +48,61 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Home opens the next scheduled trip for the signed-in user',
+      (tester) async {
+    final auth = AuthUserState();
+    await auth.updateAuthUser(inAppUser: AppUser(id: 'me'));
+    addTearDown(auth.dispose);
+    final messenger = tester.binding.defaultBinaryMessenger;
+    const ads = 'plugins.flutter.io/google_mobile_ads';
+    messenger.setMockMessageHandler(ads,
+        (_) async => const StandardMethodCodec().encodeSuccessEnvelope(null));
+    addTearDown(() => messenger.setMockMessageHandler(ads, null));
+    final now = DateTime.now();
+    final next = Trip(
+      requester: 'ME',
+      tripType: 'Next private ride',
+      tripDateTime: now.add(const Duration(days: 1)),
+    );
+    await tester.pumpWidget(ChangeNotifierProvider.value(
+      value: auth,
+      child: MaterialApp(
+        theme: ClearBlue.theme,
+        home: Home(
+            loadTrips: () async => [
+                  Trip(
+                      requester: 'other',
+                      tripType: 'Other rider',
+                      tripDateTime: now.add(const Duration(hours: 1))),
+                  Trip(
+                      requester: 'me',
+                      tripType: 'Cancelled ride',
+                      tripStatus: 'Cancelled',
+                      tripDateTime: now.add(const Duration(hours: 2))),
+                  Trip(
+                      requester: 'me',
+                      tripType: 'Later ride',
+                      tripDateTime: now.add(const Duration(days: 2))),
+                  next,
+                ]),
+        routes: {
+          '/viewrequest': (context) => Scaffold(
+                body: Text((ModalRoute.of(context)!.settings.arguments as Trip)
+                    .tripType!),
+              ),
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Next private ride'), 120);
+    expect(find.text('Next trip'), findsOneWidget);
+    expect(find.text('Other rider'), findsNothing);
+    await tester.tap(find.text('Next private ride'));
+    await tester.pumpAndSettle();
+    expect(find.text('Next private ride'), findsOneWidget);
+    expect(find.text('Next trip'), findsNothing);
+  });
+
   for (final size in [
     const Size(320, 568),
     const Size(396, 900),
@@ -61,9 +121,9 @@ void main() {
               child: child!),
           home: const HomeContent(name: '')));
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Send an item'));
+      await tester.scrollUntilVisible(find.text('Send an item'), 100);
       expect(tester.takeException(), isNull);
-      expect(find.text('HELLO THERE'), findsOneWidget);
+      expect(find.text('Find transport'), findsWidgets);
     });
   }
 }
