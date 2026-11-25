@@ -52,12 +52,12 @@ void main() {
           find.byType(TextFormField).first, 'test@example.com');
       await tester.enterText(find.byType(TextFormField).last, 'test-password');
       if (remember) {
-        await tester.ensureVisible(find.text('Remember me'));
-        await tester.tap(find.text('Remember me'));
+        await tester.ensureVisible(find.text('Keep me signed in'));
+        await tester.tap(find.text('Keep me signed in'));
         await tester.pump();
       }
-      await tester.ensureVisible(find.text('Login'));
-      await tester.tap(find.text('Login'));
+      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Sign in'));
+      await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
       await tester.pumpAndSettle();
       expect(find.text('Open settings'), findsOneWidget);
       expect(auth.appUser!.id, 'user-123');

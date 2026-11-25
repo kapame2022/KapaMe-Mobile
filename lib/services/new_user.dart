@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class UserState extends ChangeNotifier {
   DateTime _dateOfBirth = DateTime.now();
+  bool _hasSelectedDateOfBirth = false;
+  bool get hasSelectedDateOfBirth => _hasSelectedDateOfBirth;
   String _gender = 'Select gender';
   String _fullName = '';
   String _email = '';
@@ -23,6 +25,7 @@ class UserState extends ChangeNotifier {
 
   void updateDateOfBirth(DateTime newDateOfBirth) {
     _dateOfBirth = newDateOfBirth;
+    _hasSelectedDateOfBirth = true;
     notifyListeners();
   }
 

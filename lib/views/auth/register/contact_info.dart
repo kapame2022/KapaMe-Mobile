@@ -2,85 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:kapame/services/new_user.dart';
 import 'package:provider/provider.dart';
 
-class ContactInfo extends StatefulWidget {
+class ContactInfo extends StatelessWidget {
   const ContactInfo({super.key});
-
-  @override
-  State<ContactInfo> createState() => _ContactInfoState();
-}
-
-class _ContactInfoState extends State<ContactInfo> {
-  TextEditingController fullNameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 30),
-        TextField(
-          controller: fullNameController,
-          onChanged:
-              Provider.of<UserState>(context, listen: false).updateFullName,
+    final user = context.read<UserState>();
+    return AutofillGroup(
+        child: Column(children: [
+      TextFormField(
+          initialValue: user.fullName,
+          onChanged: user.updateFullName,
+          textCapitalization: TextCapitalization.words,
+          autofillHints: const [AutofillHints.name],
+          textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
-            hintText: 'Enter your full name',
-            border: OutlineInputBorder(
-                borderSide: BorderSide(width: 1),
-                borderRadius: BorderRadius.all(Radius.circular(10))),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: Colors.lightBlue,
-                  width: 1), // Customize focused border
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
-          controller: emailController,
-          onChanged: Provider.of<UserState>(context, listen: false).updateEmail,
+              constraints: BoxConstraints(minHeight: 72),
+              labelText: 'Full name',
+              floatingLabelStyle: TextStyle(fontSize: 16),
+              floatingLabelBehavior: FloatingLabelBehavior.always),
+          validator: (value) =>
+              (value ?? '').trim().isEmpty ? 'Enter your full name' : null),
+      const SizedBox(height: 16),
+      TextFormField(
+          initialValue: user.email,
+          onChanged: user.updateEmail,
+          keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
-            hintText: 'Enter your email',
-            border: OutlineInputBorder(
-              borderSide: BorderSide(width: 1),
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  color: Colors.lightBlue,
-                  width: 1), // Customize focused border
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
-          controller: phoneNumberController,
-          onChanged:
-              Provider.of<UserState>(context, listen: false).updatePhoneNumber,
-          obscureText: false,
+              constraints: BoxConstraints(minHeight: 72),
+              labelText: 'Email address',
+              floatingLabelStyle: TextStyle(fontSize: 16),
+              floatingLabelBehavior: FloatingLabelBehavior.always),
+          validator: (value) =>
+              RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value ?? '')
+                  ? null
+                  : 'Enter a valid email address'),
+      const SizedBox(height: 16),
+      TextFormField(
+          initialValue: user.phoneNumber,
+          onChanged: user.updatePhoneNumber,
+          keyboardType: TextInputType.phone,
+          autofillHints: const [AutofillHints.telephoneNumber],
           decoration: const InputDecoration(
-            hintText: 'Phone Number',
-            border: OutlineInputBorder(
-              borderSide: BorderSide(width: 1),
-              borderRadius: BorderRadius.all(
-                Radius.circular(10),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.lightBlue, width: 1),
-            ),
-          ),
-          validator: (String? value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter some text';
-            }
-            return null;
-          },
-        ),
-        const SizedBox(height: 30)
-      ],
-    );
+              constraints: BoxConstraints(minHeight: 72),
+              labelText: 'Phone number',
+              floatingLabelStyle: TextStyle(fontSize: 16),
+              floatingLabelBehavior: FloatingLabelBehavior.always),
+          validator: (value) =>
+              RegExp(r'^\+?[0-9]{10,14}$').hasMatch(value ?? '')
+                  ? null
+                  : 'Enter a valid phone number'),
+    ]));
   }
 }

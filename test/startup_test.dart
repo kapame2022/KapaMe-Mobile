@@ -11,8 +11,8 @@ void main() {
   testWidgets('signed-out startup shows the landing page', (tester) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
-    expect(find.text('Log in'), findsOneWidget);
-    expect(find.text('Register'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Create an account'), findsOneWidget);
   });
 
   testWidgets('restored startup opens Home with the saved user',

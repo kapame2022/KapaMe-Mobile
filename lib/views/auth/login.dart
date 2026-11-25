@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kapame/models/app_user.dart';
 import 'package:kapame/models/auth_response.dart';
 import 'package:kapame/services/current_user.dart';
+import 'package:kapame/theme/clear_blue.dart';
+import 'package:kapame/widgets/auth_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:kapame/services/session_storage.dart';
 
@@ -23,8 +24,7 @@ class _LoginState extends State<Login> {
   TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
-  bool isSuccess = false;
-  bool isComplete = false;
+  String? errorMessage;
   bool obscureText = true;
 
   bool rememberMe = false;
@@ -38,18 +38,18 @@ class _LoginState extends State<Login> {
   }
 
   Future<AuthResponse?> loginUser() async {
-    if (!_formKey.currentState!.validate()) {
+    if (isLoading || !_formKey.currentState!.validate()) {
       // If validation fails, return null without starting the loading process
       return null;
     }
 
     setState(() {
       isLoading = true;
+      errorMessage = null;
     });
     final shouldRemember = rememberMe;
+    final dio = widget.dio ?? Dio();
     try {
-      final Dio dio = widget.dio ?? Dio();
-
       dio.options.connectTimeout = const Duration(seconds: 30);
       dio.options.receiveTimeout = const Duration(seconds: 30);
 
@@ -69,28 +69,27 @@ class _LoginState extends State<Login> {
           DateTime.parse(res.data['expireDate']),
         );
 
-        if (!currentUser.isSuccess || currentUser.token.isEmpty) return null;
+        if (!currentUser.isSuccess || currentUser.token.isEmpty) {
+          if (mounted) {
+            setState(
+                () => errorMessage = 'Unable to sign in. Please try again.');
+          }
+          return null;
+        }
         await _sessionStorage.save(currentUser, rememberMe: shouldRemember);
         if (!mounted) return null;
-
-        setState(() {
-          isSuccess = true;
-        });
 
         return currentUser;
       }
     } catch (e) {
       if (!mounted) return null;
       final data = e is DioException ? e.response?.data : null;
-      Fluttertoast.showToast(
-        msg: data is Map && data['message'] is String
-            ? data['message'] as String
-            : 'Unable to sign in. Please try again.',
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
+      setState(() => errorMessage = data is Map && data['message'] is String
+          ? data['message'] as String
+          : 'Unable to sign in. Please try again.');
       return null;
     } finally {
+      if (widget.dio == null) dio.close();
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -100,183 +99,101 @@ class _LoginState extends State<Login> {
     return null;
   }
 
-  //Function that checks what the status of an input
-  //for username and password
-  bool formComplete(String value) {
-    //Validate the status of the required inputs
-    // Check if both username and password fields are not empty
-    if (usernameController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty) {
-      setState(() {
-        isComplete = true;
-      });
-    } else {
-      setState(() {
-        isComplete = false;
-      });
-    }
-    return false;
+  Future<void> _signIn() async {
+    final response = await loginUser();
+    if (!mounted || response == null) return;
+    context.read<AuthUserState>().updateAuthUser(
+          inMessage: response.message,
+          inIsSuccess: response.isSuccess,
+          inToken: response.token,
+          inErrors: response.errors,
+          inAppUser: response.user,
+          inExpireDate: response.expireDate ?? DateTime.now(),
+        );
+    Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
   }
 
   @override
-  Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 30),
-          child: SingleChildScrollView(
+  Widget build(BuildContext context) => AuthScreen(
+        title: 'Sign in',
+        child: AutofillGroup(
+          child: Form(
+            key: _formKey,
             child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Image.asset('assets/images/KapaMeLogo.png'),
-                  Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 0, vertical: 50),
-                    width: screenWidth,
-                    child: Column(
-                      children: [
-                        Form(
-                          key: _formKey,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              TextFormField(
-                                controller: usernameController,
-                                onChanged: formComplete,
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter your email',
-                                  border: OutlineInputBorder(
-                                      borderSide: BorderSide(width: 1),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10))),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Colors.lightBlue,
-                                        width: 1), // Customize focused border
-                                  ),
-                                ),
-                                validator: (String? value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter some text';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              TextFormField(
-                                controller: passwordController,
-                                onChanged: formComplete,
-                                obscureText: obscureText,
-                                decoration: InputDecoration(
-                                  hintText: 'Password',
-                                  border: const OutlineInputBorder(
-                                    borderSide: BorderSide(width: 1),
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(10),
-                                    ),
-                                  ),
-                                  focusedBorder: const OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: Colors.lightBlue,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      obscureText
-                                          ? Icons.visibility_off
-                                          : Icons.visibility,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        obscureText = !obscureText;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                validator: (String? value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter some text';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              CheckboxListTile(
-                                contentPadding: EdgeInsets.zero,
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                                title: const Text('Remember me'),
-                                value: rememberMe,
-                                onChanged: isLoading
-                                    ? null
-                                    : (value) => setState(() {
-                                          rememberMe = value ?? false;
-                                        }),
-                              ),
-                              const SizedBox(height: 20),
-                              FilledButton(
-                                onPressed: isLoading
-                                    ? null
-                                    : () async {
-                                        AuthResponse? authRes =
-                                            await loginUser();
-                                        if (!context.mounted) return;
-
-                                        if (authRes?.isSuccess == true) {
-                                          Provider.of<AuthUserState>(context,
-                                                  listen: false)
-                                              .updateAuthUser(
-                                                  inMessage: authRes!.message,
-                                                  inIsSuccess:
-                                                      authRes.isSuccess,
-                                                  inToken: authRes.token,
-                                                  inErrors: authRes.errors,
-                                                  inAppUser: authRes.user,
-                                                  inExpireDate:
-                                                      authRes.expireDate ??
-                                                          DateTime.now());
-                                          Navigator.pushNamedAndRemoveUntil(
-                                              context,
-                                              '/home',
-                                              (route) => false);
-                                        }
-                                      },
-                                style: ButtonStyle(
-                                  shape: const WidgetStatePropertyAll(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                  minimumSize: const WidgetStatePropertyAll(
-                                    Size(double.infinity, 60),
-                                  ),
-                                  backgroundColor: WidgetStatePropertyAll(
-                                    isComplete
-                                        ? Colors.green
-                                        : const Color.fromARGB(255, 72, 72, 72),
-                                  ),
-                                ),
-                                child: isLoading
-                                    ? const CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
-                                      )
-                                    : const Text("Login"),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Welcome back', style: ClearBlue.heading),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: usernameController,
+                  enabled: !isLoading,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.username],
+                  decoration: const InputDecoration(labelText: 'Email address'),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Enter your email address'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: passwordController,
+                  enabled: !isLoading,
+                  obscureText: obscureText,
+                  autofillHints: const [AutofillHints.password],
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      tooltip: obscureText ? 'Show password' : 'Hide password',
+                      icon: Icon(obscureText
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined),
+                      onPressed: () =>
+                          setState(() => obscureText = !obscureText),
                     ),
                   ),
-                ]),
+                  onFieldSubmitted: (_) => _signIn(),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Enter your password'
+                      : null,
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: const Text('Keep me signed in'),
+                  value: rememberMe,
+                  onChanged: isLoading
+                      ? null
+                      : (value) => setState(() => rememberMe = value ?? false),
+                ),
+                if (errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Semantics(
+                      liveRegion: true,
+                      child: Text(errorMessage!,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.error)),
+                    ),
+                  ),
+                FilledButton(
+                  onPressed: isLoading ? null : _signIn,
+                  child: isLoading
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text('Sign in'),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: isLoading
+                      ? null
+                      : () => Navigator.pushNamed(context, '/register'),
+                  child: const Text('Create an account'),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }

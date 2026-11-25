@@ -1,61 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:kapame/widgets/auth_screen.dart';
 
 class VerifyEmail extends StatelessWidget {
   const VerifyEmail({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
+  Widget build(BuildContext context) => AuthScreen(
+        title: 'Email verification',
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.email,
-                    size: 80,
-                    color: Colors.blue,
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    'Please verify your email',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+            const AuthHighlight(
+              icon: Icons.mark_email_read_outlined,
+              title: 'Check your inbox',
+              description:
+                  'Follow the verification link sent to your email address.',
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24.0),
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, '/login');
-                },
-                style: const ButtonStyle(
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                    ),
-                  ),
-                  minimumSize: WidgetStatePropertyAll(
-                    Size(double.infinity, 60),
-                  ),
-                  backgroundColor: WidgetStatePropertyAll(
-                    Color.fromARGB(255, 242, 157, 53),
-                  ),
-                ),
-                child: const Text("Login"),
-              ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: () =>
+                  Navigator.pushReplacementNamed(context, '/login'),
+              child: const Text('Back to sign in'),
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
 }
