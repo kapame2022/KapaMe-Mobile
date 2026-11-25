@@ -20,7 +20,7 @@ void main() {
     await tester.ensureVisible(find.text('Continue'));
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
-    expect(find.text('ABOUT YOU · STEP 2 OF 3'), findsOneWidget);
+    expect(find.text('Step 2 of 3'), findsOneWidget);
     expect(user.hasSelectedDateOfBirth, isFalse);
     final dateHeight = tester.getSize(find.byType(TextFormField)).height;
     final genderHeight =
@@ -45,7 +45,7 @@ void main() {
     await tester.ensureVisible(find.text('Continue'));
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
-    expect(find.text('SECURITY · STEP 3 OF 3'), findsOneWidget);
+    expect(find.text('Step 3 of 3'), findsOneWidget);
     await tester.enterText(find.byType(TextFormField).at(0), 'test-password');
     await tester.enterText(find.byType(TextFormField).at(1), 'test-password');
     await tester.tap(find.byTooltip('Back'));

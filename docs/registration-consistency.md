@@ -1,6 +1,6 @@
 # Registration consistency
 
-Matching date and gender fields, clearer step progress, persistent entries when moving between steps, and inline validation before account creation.
+Clear Blue Welcome, Sign in, registration and email verification screens. Registration uses matching date and gender fields, clearer step progress, persistent entries when moving between steps, and inline validation before account creation.
 
 ## Review screens
 

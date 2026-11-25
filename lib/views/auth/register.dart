@@ -326,17 +326,7 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    const headings = [
-      'Let’s get acquainted.',
-      'A little about you.',
-      'Keep your account safe.'
-    ];
-    const labels = ['CONTACT DETAILS', 'ABOUT YOU', 'SECURITY'];
-    const descriptions = [
-      'Your contact details, all in one place.',
-      'Add your personal details to continue.',
-      'Choose a password to finish signing up.'
-    ];
+    const headings = ['Contact details', 'About you', 'Secure your account'];
     return PopScope(
       canPop: _currentStep == 0 && !isLoading,
       onPopInvokedWithResult: (didPop, result) {
@@ -364,8 +354,7 @@ class _RegisterState extends State<Register> {
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700)),
                           const SizedBox(height: 24),
-                          Text(
-                              '${labels[_currentStep]} · STEP ${_currentStep + 1} OF 3',
+                          Text('Step ${_currentStep + 1} of 3',
                               style: ClearBlue.label),
                           const SizedBox(height: 16),
                           Row(
@@ -387,10 +376,7 @@ class _RegisterState extends State<Register> {
                           const SizedBox(height: 24),
                           Text(headings[_currentStep],
                               style: ClearBlue.heading),
-                          const SizedBox(height: 12),
-                          Text(descriptions[_currentStep],
-                              style: const TextStyle(color: ClearBlue.muted)),
-                          const SizedBox(height: 28),
+                          const SizedBox(height: 24),
                           AbsorbPointer(
                               absorbing: isLoading,
                               child: stepList[_currentStep]),
